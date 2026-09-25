@@ -7,10 +7,14 @@ Next.js 16 (App Router) · TypeScript · Tailwind 4 · Prisma 6 · PostgreSQL 16
 `SPEC.md` is the brief and the authority. `CLAUDE.md` holds the invariants;
 `docs/DECISIONS.md` records why things are the way they are.
 
-**Status: Phase 2 of 5** (SPEC §15). The test flow is real: Begin writes an `Attempt`,
-every answer is saved as it is given, Back and resume work, and statement 15 completes the
-attempt and moves to `/send`. `/send` is a stub and the results page still renders sample
-scores derived from the URL — both are marked in the code and replaced in Phase 3.
+**Status: Phase 3 of 5** (SPEC §15). The whole respondent flow is real end to end: Begin
+writes an `Attempt`, every answer is saved as it is given, `/send` collects first name and
+email behind the full safeguard set, and `/r/[id]` renders the scored result from the
+database. Still to come: the GoHighLevel webhook and the admin dashboard (Phase 4), and
+the final copy, privacy policy and custom domain (Phase 5).
+
+**GoHighLevel is not configured.** `GHL_WEBHOOK_URL` is deliberately unset, so no results
+email is sent yet.
 
 ## Local setup
 
@@ -34,6 +38,7 @@ and `ADMIN_PASSWORD` need filling in.
 |---|---|
 | `npm run check` | typecheck + lint + Vitest (including the 3,125-pattern-per-section scoring verification) |
 | `npm run test:e2e` | Playwright suite at 390px (starts `next dev` on port 3100 if nothing is listening) |
+| `E2E_BASE_URL=… E2E_TOKEN=… npx playwright test` | run the suite against a deployment; rows it creates are flagged `isSeed` |
 | `npm run build` / `npm start` | production build (standalone output) |
 | `npm run db:seed` | demo data — a no-op until Phase 4 |
 
@@ -49,9 +54,7 @@ and `ADMIN_PASSWORD` need filling in.
 | `/admin/*` | password-protected dashboard (Phase 4) |
 | `/api/health` | 200 + DB ping (Railway healthcheck) |
 
-While Phase 1 is live, these render the results page against real scoring with sample
-answers: `/r/sample-mixed`, `/r/sample-tie`, `/r/sample-equal`, `/r/sample-low`,
-`/r/sample-high`.
+`/r/[id]` renders only a real submitted attempt; anything else is a 404.
 
 ## Railway deploy
 

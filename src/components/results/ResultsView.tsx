@@ -5,6 +5,8 @@ import { terrainLine } from "@/lib/terrain";
 import { Wordmark } from "@/components/Wordmark";
 import { Tbd } from "@/components/Tbd";
 import { ScoreMeter } from "./ScoreMeter";
+import { RetakeLink } from "./RetakeLink";
+import { retakeAction } from "@/app/r/[id]/actions";
 
 const isTbd = (s: string) => s.startsWith("[COPY TBD");
 const Copy = ({ text }: { text: string }) => (isTbd(text) ? <Tbd>{text}</Tbd> : <>{text}</>);
@@ -98,9 +100,9 @@ export function ResultsView({ scored }: { scored: Scored }) {
           <Copy text={RESULTS.loopLine} />
         </p>
         <p className="mt-4 max-w-prose text-base leading-relaxed text-ink">{RESULTS.deliverabilityNote}</p>
-        <p className="mt-10 text-sm">
-          <Copy text={RESULTS.retakeLink} />
-        </p>
+        <div className="mt-10">
+          <RetakeLink label={RESULTS.retakeLink} action={retakeAction} />
+        </div>
       </div>
     </div>
   );

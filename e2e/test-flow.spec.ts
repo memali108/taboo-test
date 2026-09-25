@@ -46,6 +46,17 @@ test("a full run reaches the send step with all 15 answers saved", async ({ page
   await expect(page.getByRole("heading", { name: "Where should I send your results?" })).toBeVisible();
 });
 
+const FIRST_NAME = "Testy";
+const testEmail = () => `taboo-e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
+
+/** Fill and submit /send. The 2-second minimum-time guard is real, so wait it out. */
+async function submitSend(page: Page, email: string, firstName = FIRST_NAME) {
+  await page.getByLabel("First name").fill(firstName);
+  await page.getByLabel("Email").fill(email);
+  await page.waitForTimeout(2100);
+  await page.getByRole("button", { name: /.+/ }).last().click();
+}
+
 test("Back returns to the previous statement and the answer can be changed", async ({ page }) => {
   await begin(page);
   await passTitleCard(page);
@@ -129,4 +140,88 @@ test("rows created by this run are flagged isSeed", async ({ page }) => {
   const body = await res.json();
   expect(body.ok).toBe(true);
   expect(body.isSeed, "the attempt was created without the seed flag").toBe(true);
+});
+
+test("submitting reaches a private results page with real scores and no personal data", async ({ page }) => {
+  await begin(page);
+  // All 3s -> 15 / 15 / 15, every section Medium, all three tied so no terrain.
+  await runAll(page, () => 3);
+  await expect(page).toHaveURL(/\/send$/);
+
+  const email = testEmail();
+  await submitSend(page, email);
+  await expect(page).toHaveURL(/\/r\/[a-z2-9]{24}$/);
+
+  await expect(page.getByRole("heading", { name: "HERE ARE YOUR TABOO TEST RESULTS" })).toBeVisible();
+  for (const line of ["15 / 25"]) await expect(page.getByText(line).first()).toBeVisible();
+
+  // SPEC §7.5 / §2: no first name, no email address anywhere in the HTML.
+  const html = await page.content();
+  expect(html).not.toContain(email);
+  expect(html).not.toContain(FIRST_NAME);
+  // And it must not be indexable.
+  expect(html).toContain("noindex");
+});
+
+test("/send keeps what was typed when validation fails", async ({ page }) => {
+  await begin(page);
+  await runAll(page, () => 4);
+  await expect(page).toHaveURL(/\/send$/);
+
+  await page.getByLabel("First name").fill("Wilhelmina");
+  await page.getByLabel("Email").fill("not-an-email");
+  await page.waitForTimeout(2100);
+  await page.getByRole("button", { name: /.+/ }).last().click();
+
+  // Still on /send, with an error and both fields intact.
+  await expect(page).toHaveURL(/\/send$/);
+  await expect(page.getByText(/check your email address/i).first()).toBeVisible();
+  await expect(page.getByLabel("First name")).toHaveValue("Wilhelmina");
+  await expect(page.getByLabel("Email")).toHaveValue("not-an-email");
+});
+
+test("the minimum-time guard rejects an instant submission", async ({ page }) => {
+  await begin(page);
+  await runAll(page, () => 2);
+  await page.getByLabel("First name").fill(FIRST_NAME);
+  await page.getByLabel("Email").fill(testEmail());
+  await page.getByRole("button", { name: /.+/ }).last().click(); // no wait
+  await expect(page.getByText(/take a moment/i).first()).toBeVisible();
+  await expect(page).toHaveURL(/\/send$/);
+});
+
+test("a submitted attempt redirects away from /test and /send", async ({ page }) => {
+  await begin(page);
+  await runAll(page, () => 5);
+  await submitSend(page, testEmail());
+  await expect(page).toHaveURL(/\/r\/[a-z2-9]{24}$/);
+  const resultsUrl = page.url();
+
+  await page.goto("/test");
+  await expect(page).toHaveURL(resultsUrl);
+  await page.goto("/send");
+  await expect(page).toHaveURL(resultsUrl);
+});
+
+test("a retake with the same email gets its own results page", async ({ page }) => {
+  const email = testEmail();
+
+  await begin(page);
+  await runAll(page, () => 1);
+  await submitSend(page, email);
+  const first = page.url();
+
+  // "Take it again" clears the cookie and starts a fresh attempt.
+  await page.getByRole("button", { name: /.+/ }).last().click();
+  await expect(page).toHaveURL(/\/$/);
+
+  await page.getByRole("button", { name: "Begin" }).click();
+  await runAll(page, () => 5);
+  await submitSend(page, email);
+  const second = page.url();
+
+  expect(second).not.toBe(first);
+  // The earlier results stay reachable at their own URL — every attempt is kept.
+  await page.goto(first);
+  await expect(page.getByRole("heading", { name: "HERE ARE YOUR TABOO TEST RESULTS" })).toBeVisible();
 });

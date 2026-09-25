@@ -1,39 +1,60 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { score, isCompleteAnswers } from "@/lib/scoring";
+import { isPublicId } from "@/lib/public-id";
 import { ResultsView } from "@/components/results/ResultsView";
-import { score } from "@/lib/scoring";
-import { PHASE1_SAMPLE_ANSWERS, sampleAnswersFor } from "@/lib/phase1-samples";
+import { ResultTracker } from "@/components/results/ResultTracker";
 
-/**
- * PHASE 1 ONLY — the look, not the data.
- *
- * Nothing is read from the database yet. The id is turned into a plausible
- * answer string so the page can be reviewed against real scoring, real levels
- * and real terrain logic. Phase 3 replaces this with the Attempt lookup and a
- * 404 for unknown ids (SPEC §15).
- *
- * Named ids render the interesting cases:
- *   /r/sample-mixed   one lowest section
- *   /r/sample-tie     two sections tied for lowest
- *   /r/sample-equal   all three tied — no terrain
- *   /r/sample-low     every section Low
- *   /r/sample-high    every section High
- * Any other id hashes to a stable pattern of its own.
- */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Your results",
-  // These are personal answers about sex, death and money.
+  // These are personal answers about sex, death and money. `Referrer-Policy: no-referrer`
+  // for /r/* is set in next.config.ts.
   robots: { index: false, follow: false },
 };
 
-export default async function ResultsPage({ params }: { params: Promise<{ id: string }> }) {
+/**
+ * The private results page (SPEC §7.5). Rendered from the database, reachable only by
+ * the 24-character random `publicId` — which is the only guard, because the link has to
+ * keep working from the results email.
+ *
+ * It shows NO first name, NO email address and NO past scores. Anyone can type any
+ * address into /send, so past scores on this page would expose someone else's results;
+ * they go in the email, which only reaches the address's owner (SPEC §2).
+ */
+export default async function ResultsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { id } = await params;
-  const answers = PHASE1_SAMPLE_ANSWERS[id] ?? sampleAnswersFor(id);
+  // Cheap shape check first, so a junk URL never reaches the database.
+  if (!isPublicId(id)) notFound();
+
+  const attempt = await prisma.attempt.findUnique({
+    where: { publicId: id },
+    select: { id: true, status: true, answers: true, testVersion: true, resultViewedAt: true },
+  });
+  if (!attempt || attempt.status !== "submitted" || !isCompleteAnswers(attempt.answers)) notFound();
+
+  const sp = await searchParams;
+  const source = (Array.isArray(sp.utm_source) ? sp.utm_source[0] : sp.utm_source) === "email" ? "email" : "submit";
+
+  // First view only, so a re-read months later does not overwrite the original timestamp.
+  if (!attempt.resultViewedAt) {
+    await prisma.attempt
+      .update({ where: { id: attempt.id }, data: { resultViewedAt: new Date() } })
+      .catch(() => {});
+  }
+
   return (
     <main className="flex min-h-dvh flex-col bg-paper">
-      <ResultsView scored={score(answers)} />
-      <p className="mx-auto w-full max-w-2xl px-5 pb-10 text-xs text-ink-3 sm:px-8">
-        Phase 1 preview · scores generated from the URL, not from a saved attempt.
-      </p>
+      <ResultTracker source={source} />
+      <ResultsView scored={score(attempt.answers, attempt.testVersion)} />
     </main>
   );
 }

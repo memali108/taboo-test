@@ -18,7 +18,6 @@ import type { Section } from "@/config/test";
 export function SectionTitleCard({ section, onBegin }: { section: Section; onBegin: () => void }) {
   const copy = SECTION_COPY[section];
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       onClick={onBegin}
       className="group animate-reveal -mx-5 flex flex-1 cursor-pointer flex-col items-start justify-center gap-6 bg-red px-5 py-16 text-left sm:-mx-8 sm:px-8"
