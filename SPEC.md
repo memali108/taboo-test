@@ -414,7 +414,7 @@ Verbatim from *Taboo_Test_Results.docx* unless marked `[COPY TBD]`. Each "(Where
 - Title: **The Taboo Test: How Uptight Are You About Sex, Death & Cash?**
 - Intro: "Read each statement and rate how true it is for you, right now — not who you want to be, not who you used to be. Be honest." `[COPY TBD: replacement for "Nobody sees this but you."]`
 - `[COPY TBD: decide whether to keep "Most people score lower than they expect in at least one section. The lowest score is where you could stand to loosen up."]`
-- Meta line: "15 statements · about 3 minutes" · Button: "Start"
+- Meta line: "15 statements · about 3 minutes" · Button: "Begin"
 - *(Removed: the scale legend, which now appears on every card, and "A few statements are reversed — pay attention.")*
 
 ### Email step (`/send`)

@@ -2,6 +2,18 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Landing button reads "Begin" — 2026-09-25
+
+Marie-Elizabeth's copy change: the landing button is "Begin" rather than "Start", matching
+the section title cards. `SPEC.md` Appendix A updated alongside `copy.ts`, so
+`tests/copy.test.ts` still checks the running app against the spec word for word.
+
+**The title card's "Begin" was hardcoded in `SectionTitleCard.tsx`**, which broke SPEC
+§0.4 — copy lives in `src/config/copy.ts` and nowhere else. Fixed while aligning the two
+labels. It is a separate entry (`SECTION_TITLE.button`) from `LANDING.button` rather than
+one shared constant: they read the same today, but they are two different buttons and one
+should be able to change without silently dragging the other.
+
 ## Section title cards move from aubergine to red — 2026-09-25
 
 The Sex / Death / Cash title cards are now red `#62081b`. The headline stays white, the

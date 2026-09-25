@@ -26,7 +26,7 @@ export const LANDING = {
     'decide whether to keep "Most people score lower than they expect in at least one section. The lowest score is where you could stand to loosen up."',
   ),
   meta: "15 statements · about 3 minutes",
-  button: "Start",
+  button: "Begin",
 } as const;
 
 // ─── The scale, shown on every statement card (SPEC §5.1) ───────────────────
@@ -65,6 +65,15 @@ export const STATEMENT_TEXT_V1 = [
 ] as const;
 
 // ─── Section title cards (SPEC §5.3) ────────────────────────────────────────
+
+/**
+ * The title card's button. A separate entry from LANDING.button even though both read
+ * "Begin" today: they are two different buttons, and one should be able to change
+ * without silently dragging the other.
+ */
+export const SECTION_TITLE = {
+  button: "Begin",
+} as const;
 
 export const SECTION_COPY = {
   sex: {

@@ -1,5 +1,5 @@
 "use client";
-import { SECTION_COPY } from "@/config/copy";
+import { SECTION_COPY, SECTION_TITLE } from "@/config/copy";
 import type { Section } from "@/config/test";
 
 /**
@@ -23,7 +23,7 @@ export function SectionTitleCard({ section, onBegin }: { section: Section; onBeg
           sits on: sea against red is 8.47:1. Aubergine on sea is 9.88:1, and on the
           sea-deep hover 8.57:1. */}
       <span className="mt-4 inline-flex min-h-14 items-center justify-center rounded-full bg-sea px-10 text-base font-semibold text-aubergine transition group-hover:bg-sea-deep">
-        Begin
+        {SECTION_TITLE.button}
       </span>
     </button>
   );
