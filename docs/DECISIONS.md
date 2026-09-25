@@ -2,6 +2,49 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Answer cards go red on hover and keyboard focus — 2026-09-25
+
+Marie-Elizabeth's call: hovering or keyboard-focusing an answer card gives it the full
+selected look — red fill, white label, white number circle — and the selected state stays
+red. The `paper-2` → `paper-3` hover step from earlier the same day is gone; the neutrals
+still carry the card's resting state.
+
+**Hover and selected are now deliberately indistinguishable, and that has one real
+consequence.** Come back to a statement you have already answered — via Back, which SPEC
+§4 allows — and hover a different option, and two cards are red at once. Nothing tells you
+which one is your saved answer until you move the pointer away. This does not affect
+touch, where there is no hover, and 390px is the primary target; on a mouse it is a
+genuine ambiguity. Flagged, not worked around: she asked for red on hover knowing it
+matches selected. If it grates in use, the cheap fix is to drop the shadow from the hover
+state and keep it on selected.
+
+Implemented with the `hover:` and `focus-visible:` variants rather than React state, so
+the keyboard case is genuinely keyboard-only and a mouse click does not leave a card looking
+focused. Tailwind v4 gates `hover:` behind `@media (hover: hover)`, which also keeps the
+state from sticking after a tap on touch. The class strings are written out in full in
+`StatementCard.tsx`: Tailwind scans source text, so a class name assembled at runtime is
+never generated.
+
+### Correcting the focus ring, including one I got wrong yesterday
+
+Making a card red on focus looked like it would hide the red focus ring, so the first
+attempt gave those cards a white ring. **That was backwards.** `outline-offset: 3px` draws
+the ring *outside* the element's border box, so it never touches the element's fill — it
+lands on the page. On a white page a white ring is 1:1 and vanished completely; it was
+verified as "white" by reading `outlineColor` off the DOM, which said nothing about
+whether anyone could see it. Screenshotting it is what caught it.
+
+The same mistake is in the change made the day before: **the `.on-aubergine` sea focus
+ring was wrong and is now removed too.** Red on aubergine is 1.17:1, which is why the
+Begin *button* had to change — that part stands, a filled button really does sit on the
+aubergine. But the ring around the title card does not; it is drawn on the white header
+area behind it, where sea is 1.58:1 and fails SC 1.4.11's 3:1, while the red it replaced
+was 13.38:1. That override made the ring worse and shipped.
+
+Both overrides are gone. There is one ring for the whole app, red, and `globals.css` now
+says why a per-surface override is the wrong instinct. CLAUDE.md and SPEC §7.1 are
+corrected to match.
+
 ## White page, and the knock-on effects — 2026-09-25
 
 The page moves from cream `#faf8f5` to pure white `#ffffff` to match

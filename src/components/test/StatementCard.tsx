@@ -2,6 +2,25 @@
 import { useEffect, useRef, useState } from "react";
 import { SCALE } from "@/config/copy";
 
+/**
+ * The red look. Hover and keyboard focus adopt it as well as the selected state, so a
+ * card reads the same whether you are pointing at it or have chosen it (see
+ * docs/DECISIONS.md — this makes hover and selected deliberately indistinguishable).
+ *
+ * Written out in full rather than composed at runtime: Tailwind scans source text, so
+ * a class name built by concatenation is never generated.
+ */
+const CARD_RED = "border-red bg-red text-white shadow-[0_8px_24px_-12px_rgba(98,8,27,0.6)]";
+const CARD_RED_ON_HOVER_FOCUS =
+  "hover:border-red hover:bg-red hover:text-white hover:shadow-[0_8px_24px_-12px_rgba(98,8,27,0.6)] " +
+  "focus-visible:border-red focus-visible:bg-red focus-visible:text-white focus-visible:shadow-[0_8px_24px_-12px_rgba(98,8,27,0.6)]";
+
+const CIRCLE_RED = "border-white/40 bg-white/10 text-white";
+const CIRCLE_RED_ON_HOVER_FOCUS =
+  "group-hover:border-white/40 group-hover:bg-white/10 group-hover:text-white " +
+  "group-focus-visible:border-white/40 group-focus-visible:bg-white/10 group-focus-visible:text-white";
+
+
 type Props = {
   index: number;
   statement: string;
@@ -80,16 +99,16 @@ export function StatementCard({ index, statement, selected, disabled, onSelect }
               className={[
                 "group flex min-h-[4.5625rem] w-full items-center gap-4 rounded-xl border px-4 py-3 text-left transition-[background-color,border-color,transform,box-shadow] duration-200",
                 isSel
-                  ? "border-red bg-red text-white shadow-[0_8px_24px_-12px_rgba(98,8,27,0.6)]"
+                  ? CARD_RED
                   // The page is white, so an unselected card carries a tint of its own —
-                  // a white fill would dissolve into the page. Hover steps one tone darker.
-                  : "border-line bg-paper-2 text-ink hover:border-ink-3 hover:bg-paper-3 active:scale-[0.99]",
+                  // a white fill would dissolve into the page.
+                  : `border-line bg-paper-2 text-ink active:scale-[0.99] ${CARD_RED_ON_HOVER_FOCUS}`,
               ].join(" ")}
             >
               <span
                 className={[
                   "font-display flex size-9 shrink-0 items-center justify-center rounded-full border text-lg",
-                  isSel ? "border-white/40 bg-white/10 text-white" : "border-line bg-white text-ink group-hover:border-ink-3",
+                  isSel ? CIRCLE_RED : `border-line bg-white text-ink ${CIRCLE_RED_ON_HOVER_FOCUS}`,
                 ].join(" ")}
                 aria-hidden="true"
               >

@@ -87,12 +87,19 @@ Every number below is a recomputed WCAG ratio against the current tokens.
 
 **Red is invisible on aubergine.** At 1.17:1 a red button on an aubergine card is a
 button-shaped hole. The section title cards therefore use a **sea glass** Begin button
-with **aubergine** text, and anything else placed on aubergine must do the same.
+with **aubergine** text, and anything else *filled* on aubergine must do the same.
 
-The same trap catches the focus ring: `:focus-visible` is red (13.38:1 on white), which
-disappears on aubergine. Elements sitting on aubergine take the `.on-aubergine` class,
-which swaps the ring to sea (9.88:1). If you add another dark surface, give it the same
-treatment.
+**The focus ring is the exception, and it is one ring for the whole app: red.**
+`:focus-visible` uses `outline-offset: 3px`, which draws the ring **outside** the
+element's border box — so it always sits on the page, which is white, never on the
+element's own fill. Red is 13.38:1 there. An aubergine card and a red answer card get
+the same red ring, and it reads on both.
+
+Do not add a per-surface ring override. Two were tried and both were wrong: sea for the
+aubergine title card (1.58:1 on white) and white for the red answer cards (1:1 — it
+disappeared entirely). Each reasoned about the colour of the element instead of the
+colour the ring is actually drawn against. This only changes if `outline-offset` ever
+goes to 0 or negative.
 
 ### Never use `mute` for text
 

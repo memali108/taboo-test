@@ -13,7 +13,7 @@ export function SectionTitleCard({ section, onBegin }: { section: Section; onBeg
     <button
       type="button"
       onClick={onBegin}
-      className="group on-aubergine animate-reveal -mx-5 flex flex-1 cursor-pointer flex-col items-start justify-center gap-6 bg-aubergine px-5 py-16 text-left sm:-mx-8 sm:px-8"
+      className="group animate-reveal -mx-5 flex flex-1 cursor-pointer flex-col items-start justify-center gap-6 bg-aubergine px-5 py-16 text-left sm:-mx-8 sm:px-8"
     >
       <h2 className="font-display text-[clamp(3.5rem,18vw,7rem)] uppercase text-paper">{copy.name}</h2>
       <p className="text-xl italic text-sea">{copy.subtitle}</p>

@@ -182,7 +182,7 @@ Start from taboo-quiz `globals.css` (Bebas Neue display, Montserrat body, ink sc
 --color-paper-3: #eeeae2;    /* that card hovered; the meter's Low zone */
 --color-line: #d9d4cb;       /* every border and rule */
 ```
-`:focus-visible` outline → `var(--color-red)` (13.38:1 on white). On aubergine it must switch to `var(--color-sea)` (9.88:1); red would be 1.17:1 and invisible. The `.on-aubergine` class does this.
+`:focus-visible` outline → `var(--color-red)`, everywhere, with `outline-offset: 3px`. The offset puts the ring outside the element's border box, so it is always drawn against the white page (13.38:1), never against the element's own fill — no per-surface override is needed or wanted, on aubergine or on the red answer cards.
 
 `<meta name="theme-color">` → `#ffffff`.
 
