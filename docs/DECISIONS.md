@@ -2,6 +2,20 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Railway: two things that diverge from the spec — 2026-09-25
+
+**Postgres is 18, not the 16 SPEC §3 names.** Railway's PostgreSQL plugin now provisions
+`postgres-ssl:18`; pinning 16 would mean building the database service from a custom
+image. Nothing in this app is version-specific — there is no pgvector here — and the
+initial migration applied cleanly on 18. Flagged rather than fought; say so if you want 16.
+
+**`railway.json` is deprecated as of this deploy.** Railway's CLI now prefers
+Infrastructure as Code (`.railway/railway.ts`) and warns that config-as-code files
+"keep working until **2026-12-01**". SPEC §3 asks for taboo-quiz's `railway.json`, and it
+is what is deployed and working, so it stays for the Phase 1 review. **It has to be
+migrated before 2026-12-01** — `railway config migrate` does it. Best done in Phase 4 or
+5, not in the middle of a look review.
+
 ## Phase 1: scaffold and look — 2026-09-25
 
 What Phase 1 ships, per SPEC §15.1: the repo, the copied infrastructure, the design
