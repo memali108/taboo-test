@@ -98,16 +98,27 @@ body {
 }
 
 /*
- * There is no per-surface override, and there must not be one: `outline-offset: 3px`
- * draws the ring OUTSIDE the element's border box, so it lands on the page — white —
- * whatever colour the element itself is. Red is 13.38:1 there.
+ * `outline-offset: 3px` draws the ring OUTSIDE the element's border box. For anything
+ * sitting directly on the page that means the ring lands on white, whatever colour the
+ * element itself is — so red (13.38:1 on white) is right, and a per-surface override is
+ * not just unnecessary but actively wrong.
  *
- * Two earlier "fixes" here were wrong for exactly that reason: a sea ring for the
- * section title card and a white ring for the red answer cards. Both reasoned about
- * the element's own fill, and both measured against a surface the ring never touches.
- * Sea on white is 1.58:1 and white on white is 1:1 — the second was invisible. If you
- * ever set `outline-offset` to 0 or a negative value, this stops being true.
+ * Two earlier "fixes" got this backwards: a sea ring for the section title card and a
+ * white ring for the red answer cards. Both reasoned about the element's own fill and
+ * measured against a surface the ring never touches. Sea on white is 1.58:1; white on
+ * white is 1:1 and vanished completely.
+ *
+ * The real exception is a control NESTED INSIDE a coloured card, where "just outside the
+ * control" is still inside the card. The Begin button sits on the red title card, so its
+ * ring is drawn on red, where the default is 1.17:1. White is 13.38:1 there.
+ *
+ * The test for which case you are in is not "what colour is this element" but "what will
+ * the 3px of page immediately around it be showing". Check it with a screenshot; reading
+ * `outlineColor` back off the DOM tells you what you set, not what anyone can see.
  */
+.on-red-surface:focus-visible {
+  outline-color: var(--color-white);
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
