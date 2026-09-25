@@ -8,23 +8,38 @@ import type { Section } from "@/config/test";
  *
  * Nothing from the ink scale may go on this card: ink is 1.17:1 on red, ink-3 is 1.91
  * and mute is 2.96. Only white and the sea family are legible here.
+ *
+ * The card is a plain container, NOT one big <button>. Wrapping the headline, subtitle
+ * and button in a button flattens all three into a single accessible name — the section
+ * heading disappears from the accessibility tree entirely. So the only control is the
+ * Begin button, which keyboard and assistive-tech users get; the container's click
+ * handler is a pointer convenience on top of it ("tap anywhere", SPEC §5.3).
  */
 export function SectionTitleCard({ section, onBegin }: { section: Section; onBegin: () => void }) {
   const copy = SECTION_COPY[section];
   return (
-    <button
-      type="button"
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+    <div
       onClick={onBegin}
       className="group animate-reveal -mx-5 flex flex-1 cursor-pointer flex-col items-start justify-center gap-6 bg-red px-5 py-16 text-left sm:-mx-8 sm:px-8"
     >
       <h2 className="font-display text-[clamp(3.5rem,18vw,7rem)] uppercase text-white">{copy.name}</h2>
       <p className="text-xl italic text-sea">{copy.subtitle}</p>
-      {/* Sea glass, which now also keeps the button from disappearing into the card it
-          sits on: sea against red is 8.47:1. Aubergine on sea is 9.88:1, and on the
-          sea-deep hover 8.57:1. */}
-      <span className="mt-4 inline-flex min-h-14 items-center justify-center rounded-full bg-sea px-10 text-base font-semibold text-aubergine transition group-hover:bg-sea-deep">
+      {/* Sea glass keeps the button from disappearing into the card it sits on: sea
+          against red is 8.47:1. Aubergine on sea is 9.88:1, and 8.57:1 on sea-deep.
+          `on-red-surface` is needed because THIS control sits on red, so its focus ring
+          is drawn on red — where the default red ring is 1.17:1 and invisible. */}
+      <button
+        type="button"
+        onClick={(e) => {
+          // The container handles the same click; without this, Begin fires twice.
+          e.stopPropagation();
+          onBegin();
+        }}
+        className="on-red-surface mt-4 inline-flex min-h-14 items-center justify-center rounded-full bg-sea px-10 text-base font-semibold text-aubergine transition group-hover:bg-sea-deep"
+      >
         {SECTION_TITLE.button}
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }

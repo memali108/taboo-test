@@ -18,16 +18,24 @@ const passTitleCard = async (p: Page) => {
   await p.getByRole("button", { name: "Begin" }).click();
 };
 
-const answer = async (p: Page, rating: number) => {
+/**
+ * Answer statement `index` (0-based), waiting for its screen first.
+ *
+ * The wait is not optional. A card ignores taps while its answer is being written and
+ * auto-advances 260ms after the tap, so clicking straight through without synchronising
+ * on the screen silently drops answers — which is correct app behaviour and a broken
+ * test.
+ */
+const answer = async (p: Page, index: number, rating: number) => {
+  await expect(p.getByText(`${index + 1} of 15`)).toBeVisible();
   await p.getByRole("radio").nth(rating - 1).click();
 };
 
-/** Walk the whole test, answering every statement with `rating`. */
+/** Walk the whole test, answering every statement. */
 async function runAll(p: Page, rating: (i: number) => number) {
   for (let i = 0; i < 15; i++) {
     if (i % 5 === 0) await passTitleCard(p);
-    await expect(p.getByText(`${i + 1} of 15`)).toBeVisible();
-    await answer(p, rating(i));
+    await answer(p, i, rating(i));
   }
 }
 
@@ -41,7 +49,7 @@ test("a full run reaches the send step with all 15 answers saved", async ({ page
 test("Back returns to the previous statement and the answer can be changed", async ({ page }) => {
   await begin(page);
   await passTitleCard(page);
-  await answer(page, 2); // statement 1 -> Rarely
+  await answer(page, 0, 2); // statement 1 -> Rarely
   await expect(page.getByText("2 of 15")).toBeVisible();
 
   await page.getByRole("button", { name: "← Back" }).click();
@@ -52,7 +60,7 @@ test("Back returns to the previous statement and the answer can be changed", asy
   await expect(checks).toHaveCount(1);
   await expect(page.getByRole("radio").nth(1)).toHaveAttribute("aria-checked", "true");
 
-  await answer(page, 5); // change it to Always
+  await answer(page, 0, 5); // change it to Always
   await expect(page.getByText("2 of 15")).toBeVisible();
 
   await page.getByRole("button", { name: "← Back" }).click();
@@ -63,7 +71,7 @@ test("Back returns to the previous statement and the answer can be changed", asy
 test("leaving and coming back resumes where they were", async ({ page }) => {
   await begin(page);
   await passTitleCard(page);
-  for (let i = 0; i < 3; i++) await answer(page, 3);
+  for (let i = 0; i < 3; i++) await answer(page, i, 3);
   await expect(page.getByText("4 of 15")).toBeVisible();
 
   await page.reload();
@@ -71,10 +79,18 @@ test("leaving and coming back resumes where they were", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "I completely embrace how my body is changing with age." })).toBeVisible();
 });
 
+test("the section name is a real heading, not swallowed by a button", async ({ page }) => {
+  // The card used to be one big <button>, which flattened the headline, the subtitle and
+  // Begin into a single accessible name and removed the heading from the a11y tree.
+  await begin(page);
+  await expect(page.getByRole("heading", { name: "Sex" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Begin" })).toBeVisible();
+});
+
 test("finishing a section resumes on the next section's title card, not past it", async ({ page }) => {
   await begin(page);
   await passTitleCard(page);
-  for (let i = 0; i < 5; i++) await answer(page, 3); // all of Sex
+  for (let i = 0; i < 5; i++) await answer(page, i, 3); // all of Sex
 
   await page.reload();
   // The Death title card, not Death's first statement.
