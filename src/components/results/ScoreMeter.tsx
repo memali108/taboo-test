@@ -10,6 +10,14 @@ import { RESULTS } from "@/config/copy";
  *
  * Zone edges sit on the half-point between adjacent levels (11|12 → 11.5,
  * 18|19 → 18.5) so a score of 11 lands inside Low rather than on its boundary.
+ *
+ * The track is OUTLINED and its zone edges are DRAWN, rather than relying on the
+ * fills to separate themselves. On the white page, paper-3 against sea-soft is
+ * 1.02:1 — a warm neutral and a cool tint of the same lightness cannot be told
+ * apart by luminance, which is exactly the case colour-vision deficiency makes
+ * worse. The dividers are `mute`, which is 2.86–3.77:1 against all three fills;
+ * `line` would have been 1.07:1 against sea and vanished at that edge. `mute` is
+ * barred from text, never from a rule.
  */
 const SPAN = MAX_SECTION_SCORE - MIN_SECTION_SCORE; // 20
 const pct = (score: number) => ((score - MIN_SECTION_SCORE) / SPAN) * 100;
@@ -24,17 +32,21 @@ export function ScoreMeter({ score, level }: { score: number; level: Level }) {
   return (
     <div>
       <div
-        className="relative h-3 w-full overflow-hidden rounded-full"
+        className="relative h-3 w-full overflow-hidden rounded-full border border-line"
         role="img"
         aria-label={`${score} out of ${MAX_SECTION_SCORE}, ${RESULTS.levelLabels[level]}`}
       >
         <div className="absolute inset-0 flex">
-          {ZONES.map((z) => (
-            <div key={z.key} className={z.className} style={{ width: `${pct(z.to) - pct(z.from)}%` }} />
+          {ZONES.map((z, i) => (
+            <div
+              key={z.key}
+              className={`${z.className} ${i < ZONES.length - 1 ? "border-r border-mute" : ""}`}
+              style={{ width: `${pct(z.to) - pct(z.from)}%` }}
+            />
           ))}
         </div>
         <div
-          className="absolute top-0 h-3 w-1 -translate-x-1/2 rounded-full bg-red"
+          className="absolute inset-y-0 w-1 -translate-x-1/2 rounded-full bg-red"
           style={{ left: `${pct(score)}%` }}
           aria-hidden="true"
         />

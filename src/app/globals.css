@@ -14,12 +14,14 @@
   --color-red-soft: #f6e9ec;
   --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink) */
   --color-sea: #b6d3d8;        /* Accent Sea Glass */
-  --color-sea-soft: #e9f2f3;
+  --color-sea-deep: #a4c6cd;   /* Sea Glass, pressed/hover only — never a text colour */
+  --color-sea-soft: #ddebee;   /* The tint marieelizabethmali.com uses */
 
-  /* Neutral scale */
-  --color-paper: #faf8f5;
-  --color-paper-2: #f3f0ea;
-  --color-paper-3: #e9e5dd;
+  /* Neutral scale. The page is pure white, matching marieelizabethmali.com, so the
+     tints below carry all of the figure/ground that the cream page used to. */
+  --color-paper: #ffffff;
+  --color-paper-2: #f7f5f1;
+  --color-paper-3: #eeeae2;
   --color-line: #d9d4cb;
   --color-mute: #7a766f;
   --color-ink-3: #685363;
@@ -87,11 +89,19 @@ body {
   padding-top: max(1rem, env(safe-area-inset-top));
 }
 
-/* Red, not Sea Glass: 12.6:1 on paper. Sea Glass on paper is 1.49:1. */
+/* Red, not Sea Glass: 13.38:1 on the white page. Sea Glass on white is 1.58:1. */
 :focus-visible {
   outline: 3px solid var(--color-red);
   outline-offset: 3px;
   border-radius: 4px;
+}
+
+/*
+ * Red on aubergine is 1.17:1, so the default ring is invisible on the section title
+ * cards. Anything sitting on aubergine opts into the sea ring instead (9.88:1).
+ */
+.on-aubergine:focus-visible {
+  outline-color: var(--color-sea);
 }
 
 @media (prefers-reduced-motion: reduce) {

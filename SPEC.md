@@ -163,7 +163,7 @@ A full-screen card on aubergine before each section: section name in Bebas Neue,
 
 ### 7.1 Design tokens
 
-Start from taboo-quiz `globals.css` exactly (Bebas Neue display, Montserrat body, paper neutrals, ink scale, status colors, animations, reduced-motion, safe-area helpers). Then **replace the blue family with Sea Glass**:
+Start from taboo-quiz `globals.css` (Bebas Neue display, Montserrat body, ink scale, status colors, animations, reduced-motion, safe-area helpers). Then **replace the blue family with Sea Glass**, and **replace the cream page with pure white** to match marieelizabethmali.com:
 
 ```css
 /* Brand */
@@ -172,22 +172,39 @@ Start from taboo-quiz `globals.css` exactly (Bebas Neue display, Montserrat body
 --color-red-soft: #f6e9ec;
 --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink) */
 --color-sea: #b6d3d8;        /* Accent Sea Glass */
---color-sea-soft: #e9f2f3;
+--color-sea-deep: #a4c6cd;   /* hover/pressed only — never a text colour */
+--color-sea-soft: #ddebee;   /* the tint the website uses */
 /* remove --color-blue, --color-blue-deep, --color-blue-soft, --color-accent */
+
+/* Neutrals. The page is white, so the tints carry all the figure/ground. */
+--color-paper: #ffffff;
+--color-paper-2: #f7f5f1;    /* an unselected answer card, at rest */
+--color-paper-3: #eeeae2;    /* that card hovered; the meter's Low zone */
+--color-line: #d9d4cb;       /* every border and rule */
 ```
-`:focus-visible` outline → `var(--color-red)` (12.6:1 on paper).
+`:focus-visible` outline → `var(--color-red)` (13.38:1 on white). On aubergine it must switch to `var(--color-sea)` (9.88:1); red would be 1.17:1 and invisible. The `.on-aubergine` class does this.
+
+`<meta name="theme-color">` → `#ffffff`.
 
 **Sea Glass contrast rules (measured). Put these in CLAUDE.md:**
 
 | Pairing | Ratio | Use |
 |---|---|---|
 | ink `#2e1f2a` on sea | 9.88 | ✅ text on sea panels |
+| aubergine on sea | 9.88 | ✅ the Begin button's label |
 | red on sea | 8.47 | ✅ |
+| aubergine on sea-deep | 8.57 | ✅ the Begin button, hovered |
 | sea on aubergine | 9.88 | ✅ sea text or marks on dark cards |
+| ink on sea-soft | 12.78 | ✅ terrain panel body copy |
+| ink-3 on sea-soft | 5.72 | ✅ the "most interesting terrain" label |
+| ink-3 on sea | 4.42 | ⚠️ large text only |
 | white on sea | 1.58 | ❌ never |
-| sea on paper | 1.49 | ❌ never as text, icons, or a meaningful mark on paper |
+| sea on paper (white) | 1.58 | ❌ never as text, icons, or a meaningful mark on the page |
+| **red on aubergine** | **1.17** | ❌ **never** — a red button on an aubergine card is a button-shaped hole |
 
-Tango's rule carries over: **never use `mute` for text.**
+Tango's rule carries over: **never use `mute` for text.** On the white page `mute` reaches 4.52 and technically clears AA for body text, but it fails on every tinted surface in the app (`paper-2` 4.15, `paper-3` 3.77, `sea-soft` 3.70, `sea` 2.86), so the rule stays absolute. `mute` keeps its non-text uses — it is what draws the meter's zone dividers.
+
+**The meter's zone edges must be drawn, not implied.** `paper-3` against `sea-soft` is 1.02:1: a warm neutral and a cool tint at the same lightness cannot be separated by luminance, which is exactly what colour-vision deficiency makes worse. The track is outlined in `line` and its boundaries are `mute` hairlines. (`line` is wrong for the hairlines — 1.07:1 against `sea`.)
 
 ### 7.2 Landing `/`
 Wordmark → display headline → intro → "15 statements · about 3 minutes" → red pill button → footer. Match the Tango landing layout.

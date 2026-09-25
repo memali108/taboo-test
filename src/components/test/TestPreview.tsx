@@ -47,7 +47,7 @@ export function TestPreview() {
           {statement.index + 1} of {STATEMENT_COUNT}
         </span>
       </div>
-      <div className="mb-6 h-1 overflow-hidden rounded-full bg-paper-3" aria-hidden="true">
+      <div className="mb-6 h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
         <div className="h-full bg-red transition-[width] duration-500 ease-out" style={{ width: `${pct}%` }} />
       </div>
 

@@ -67,24 +67,81 @@ statement — the 5–25 level ranges assume five per section.
 
 ## Sea Glass contrast rules (measured)
 
-The palette is Tango's with the blue family replaced by Sea Glass (`src/app/globals.css`).
+The palette is Tango's with the blue family replaced by Sea Glass, and the cream page
+replaced by **pure white** to match marieelizabethmali.com (`src/app/globals.css`).
+Every number below is a recomputed WCAG ratio against the current tokens.
 
 | Pairing | Ratio | Use |
 |---|---|---|
 | ink `#2e1f2a` on sea | 9.88 | ✅ text on sea panels |
+| aubergine on sea | 9.88 | ✅ the Begin button's label |
 | red `#62081b` on sea | 8.47 | ✅ |
+| aubergine on sea-deep `#a4c6cd` | 8.57 | ✅ the Begin button, hovered |
 | sea on aubergine `#2e1f2a` | 9.88 | ✅ sea text or marks on dark cards |
+| ink on sea-soft `#ddebee` | 12.78 | ✅ terrain panel body copy |
+| ink-3 `#685363` on sea-soft | 5.72 | ✅ the "most interesting terrain" label |
+| ink-3 on sea | 4.42 | ⚠️ large text only — just under AA for body |
 | white on sea | 1.58 | ❌ never |
-| sea on paper | 1.49 | ❌ never as text, icons, or a meaningful mark on paper |
+| sea on paper (white) | 1.58 | ❌ never as text, icons, or a meaningful mark on the page |
+| **red on aubergine** | **1.17** | ❌ **never** — see below |
 
-`:focus-visible` is **red**, not sea — 12.6:1 on paper.
+**Red is invisible on aubergine.** At 1.17:1 a red button on an aubergine card is a
+button-shaped hole. The section title cards therefore use a **sea glass** Begin button
+with **aubergine** text, and anything else placed on aubergine must do the same.
 
-**Never use `mute` for text.** `--color-mute` (`#7a766f`) fails WCAG AA against every
-background in this app. Use `ink` for content and `ink-3` for a repeated label layer
-(5.56:1 or better everywhere). `mute` is fine for borders, rules and decorative marks.
+The same trap catches the focus ring: `:focus-visible` is red (13.38:1 on white), which
+disappears on aubergine. Elements sitting on aubergine take the `.on-aubergine` class,
+which swaps the ring to sea (9.88:1). If you add another dark surface, give it the same
+treatment.
 
-On the results page the level is **always written out in text**, so colour never carries
-the meaning alone — the meter's three zones are decoration over a labelled value.
+### Never use `mute` for text
+
+`--color-mute` (`#7a766f`) fails WCAG AA for body text against every **tinted** surface in
+this app, and clears it on the white page only barely:
+
+| Background | `mute` | `ink-3` `#685363` | `ink` `#2e1f2a` |
+|---|---|---|---|
+| paper (white) `#ffffff` | 4.52 | 6.99 | 15.61 |
+| `paper-2` `#f7f5f1` | **4.15** | 6.42 | 14.33 |
+| `paper-3` `#eeeae2` | **3.77** | 5.82 | 13.01 |
+| `sea-soft` `#ddebee` | **3.70** | 5.72 | 12.78 |
+| `sea` `#b6d3d8` | **2.86** | 4.42 | 9.88 |
+
+AA needs 4.5:1 for body text, 3:1 for large text. **The white page is the one background
+`mute` now passes on, at 4.52 — and every card, panel and meter zone sits on a tint where
+it does not.** Treating it as usable on the page and unusable everywhere else is a rule
+nobody will apply correctly, so the rule stays absolute: **never put `text-mute` on text a
+person is meant to read.**
+
+- **`ink` for content** — prose, values, counts, links, placeholders. Anything read rather
+  than scanned past.
+- **`ink-3` for a repeated label layer** — column headers, the uppercase label on a tile,
+  `<dt>` terms. It clears AA on every surface except `sea`, where it is large-text only.
+
+`mute` keeps its legitimate non-text uses — borders, rules, decorative marks — where
+contrast minimums do not apply. It is what draws the meter's zone dividers. `ink-2`
+(`#422f3d`, 12.31:1 on white) is also fine; it is not a low-contrast tone.
+
+### Neutrals have to work harder on a white page
+
+The page is `#ffffff`, so a white card is no card at all. The tints carry all the
+figure/ground the cream page used to:
+
+| Token | Value | vs the white page | Role |
+|---|---|---|---|
+| `paper-2` | `#f7f5f1` | 1.09 | an unselected answer card, at rest |
+| `paper-3` | `#eeeae2` | 1.20 | that card hovered; the meter's Low zone |
+| `line` | `#d9d4cb` | 1.48 | every border and rule |
+
+**The meter's zone edges are drawn, not implied.** `paper-3` against `sea-soft` is
+**1.02:1** — a warm neutral and a cool tint at the same lightness cannot be separated by
+luminance, and that is precisely what colour-vision deficiency makes worse. So the track
+is outlined in `line` and its zone boundaries are `mute` hairlines. Do not "simplify" them
+away: without them the Low and Medium zones are one continuous band. (`line` was the first
+choice and is wrong here — it is 1.07:1 against `sea` and vanishes at the second edge.)
+
+None of this carries meaning on its own. The level is always written out in text beside
+the meter.
 
 ## Privacy is a product constraint, not a nice-to-have
 

@@ -81,13 +81,15 @@ export function StatementCard({ index, statement, selected, disabled, onSelect }
                 "group flex min-h-[4.5625rem] w-full items-center gap-4 rounded-xl border px-4 py-3 text-left transition-[background-color,border-color,transform,box-shadow] duration-200",
                 isSel
                   ? "border-red bg-red text-white shadow-[0_8px_24px_-12px_rgba(98,8,27,0.6)]"
-                  : "border-line bg-white text-ink hover:border-ink-3 hover:bg-paper-2 active:scale-[0.99]",
+                  // The page is white, so an unselected card carries a tint of its own —
+                  // a white fill would dissolve into the page. Hover steps one tone darker.
+                  : "border-line bg-paper-2 text-ink hover:border-ink-3 hover:bg-paper-3 active:scale-[0.99]",
               ].join(" ")}
             >
               <span
                 className={[
                   "font-display flex size-9 shrink-0 items-center justify-center rounded-full border text-lg",
-                  isSel ? "border-white/40 bg-white/10 text-white" : "border-line text-ink group-hover:border-ink-3",
+                  isSel ? "border-white/40 bg-white/10 text-white" : "border-line bg-white text-ink group-hover:border-ink-3",
                 ].join(" ")}
                 aria-hidden="true"
               >

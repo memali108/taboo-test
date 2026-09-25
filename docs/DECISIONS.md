@@ -2,6 +2,58 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## White page, and the knock-on effects — 2026-09-25
+
+The page moves from cream `#faf8f5` to pure white `#ffffff` to match
+marieelizabethmali.com, `sea-soft` becomes the website's `#ddebee`, and the Begin button
+on the aubergine title cards becomes sea glass. `<meta name="theme-color">` follows the
+page to `#ffffff`. SPEC §7.1 and CLAUDE.md now carry the recomputed numbers.
+
+Three things fell out of it that were not in the brief:
+
+**Red on aubergine is 1.17:1 — and that also breaks the focus ring.** The Begin button was
+the visible symptom; `:focus-visible` is red too, so keyboard focus was equally invisible
+anywhere on an aubergine card. Fixing only the button would have left the accessibility
+half of the same bug in place. There is now an `.on-aubergine` class that swaps the ring
+to sea (9.88:1), and the section title card uses it. Any future dark surface needs the
+same treatment.
+
+**An unselected answer card can no longer be white.** It was `bg-white` on a cream page —
+on a white page that is no card at all, just a border. Unselected cards are now `paper-2`
+at rest (1.09:1 against the page) stepping to `paper-3` on hover (1.10:1 against rest),
+which is why those two neutrals were retuned rather than simply lightened: they now carry
+figure/ground that the cream page used to provide for free. The selected state is
+unchanged — red with white text.
+
+**The meter's zone edges had to be drawn.** This is the one that would have shipped
+silently. On white, `paper-3` against the new `sea-soft` is **1.02:1**. A warm neutral and
+a cool tint at the same lightness cannot be separated by luminance, and colour-vision
+deficiency makes it worse, so the Low and Medium zones read as one continuous band. No
+choice of neutral fixes it — every candidate lands within 1.02–1.04 — because the
+separation is hue, not lightness. So the track is outlined in `line` and its boundaries
+are `mute` hairlines. `line` was the obvious first choice for the hairlines and is wrong:
+it is 1.07:1 against `sea` and vanishes at the second edge. `mute` is 2.86–3.77:1 against
+all three fills, and drawing a rule is one of the uses `mute` is still allowed.
+
+The `/test` progress track moved from `paper-3` to `line` for the same reason: at 1.20:1 a
+1px rule is near-invisible on white, and it is fully empty on statement 1.
+
+**`mute` now passes AA on the page, and the rule stays absolute anyway.** On white, `mute`
+is 4.52:1, which technically clears AA for body text; on cream it was 4.26:1 and failed.
+It still fails on every tinted surface in the app (`paper-2` 4.15, `paper-3` 3.77,
+`sea-soft` 3.70, `sea` 2.86). "Usable on the page, unusable on every card and panel" is a
+rule nobody applies correctly, so CLAUDE.md keeps "never use `mute` for text" and now
+states the real reason rather than the old, and now inaccurate, claim that it fails
+everywhere.
+
+**One pairing is newly worth knowing:** `ink-3` on `sea` is 4.42:1 — just under AA for
+body text, large text only. Nothing uses it today (the terrain label is `ink-3` on
+`sea-soft`, 5.72:1), but it is in the CLAUDE.md table as a trap.
+
+**`paper` and `white` are now the same value.** Both tokens stay: `white` is the ink colour
+on red fills, `paper` is the page. They are semantically distinct and will not always be
+equal.
+
 ## Railway: two things that diverge from the spec — 2026-09-25
 
 **Postgres is 18, not the 16 SPEC §3 names.** Railway's PostgreSQL plugin now provisions
