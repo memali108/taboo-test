@@ -67,3 +67,26 @@ export const SCREENS: readonly Screen[] = SECTIONS.flatMap((section) => [
   { kind: "title", section } as Screen,
   ...sectionIndices(section).map((statementIndex) => ({ kind: "statement", section, statementIndex }) as Screen),
 ]);
+
+/** Position of a statement's screen in SCREENS. */
+export const screenIndexOfStatement = (statementIndex: number): number =>
+  SCREENS.findIndex((s) => s.kind === "statement" && s.statementIndex === statementIndex);
+
+/**
+ * Where someone resumes after leaving (SPEC §4.2). `answeredCount` is the length of
+ * `Attempt.answers`, which is always a dense prefix — changing an earlier answer
+ * overwrites in place and never truncates.
+ *
+ * Resuming lands on the screen AFTER the last answered statement, which is why this
+ * cannot just be `screenIndexOfStatement(answeredCount)`: finishing Sex's fifth
+ * statement must bring back the Death title card, not skip straight past it.
+ */
+export function resumeScreenIndex(answeredCount: number): number {
+  if (answeredCount <= 0) return 0;
+  if (answeredCount >= STATEMENT_COUNT) return SCREENS.length - 1;
+  return screenIndexOfStatement(answeredCount - 1) + 1;
+}
+
+/** True when this statement is the last of its section, for `tbt_section_completed`. */
+export const isLastOfSection = (statementIndex: number): boolean =>
+  (statementIndex + 1) % SECTION_SIZE === 0;

@@ -7,10 +7,10 @@ Next.js 16 (App Router) · TypeScript · Tailwind 4 · Prisma 6 · PostgreSQL 16
 `SPEC.md` is the brief and the authority. `CLAUDE.md` holds the invariants;
 `docs/DECISIONS.md` records why things are the way they are.
 
-**Status: Phase 1 of 5** (SPEC §15). The landing page, the section title cards, the
-statement screens and the results page are built and deployed for a look review. The test
-flow saves nothing yet, and the results page renders sample scores derived from the URL —
-both are clearly marked in the code and replaced in Phases 2 and 3.
+**Status: Phase 2 of 5** (SPEC §15). The test flow is real: Begin writes an `Attempt`,
+every answer is saved as it is given, Back and resume work, and statement 15 completes the
+attempt and moves to `/send`. `/send` is a stub and the results page still renders sample
+scores derived from the URL — both are marked in the code and replaced in Phase 3.
 
 ## Local setup
 

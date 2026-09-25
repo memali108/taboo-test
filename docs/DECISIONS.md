@@ -2,6 +2,55 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Phase 2: the real test flow — 2026-09-25
+
+The preview is gone. `Begin` on the landing page writes an `Attempt`, sets the signed
+`tbt_attempt` cookie for 7 days and redirects to `/test`; every answer is written through
+`/api/answer` as it is given; statement 15 marks the attempt `completed` and sends them to
+`/send`. `TestPreview.tsx` is deleted.
+
+**Answering a statement again overwrites it in place and does NOT truncate what follows.**
+This is a deliberate departure from Taboo Tango, which truncates. Tango's key is positional
+across the whole quiz, so a changed answer re-scores everything after it; here each
+statement scores independently inside its own section, so there is nothing downstream to
+invalidate — and truncating would silently throw away answers the person had already
+given. `applyAnswer()` is pure and pinned by `tests/answers.test.ts`.
+
+**Resume lands on the screen *after* the last answered statement, not on the next
+statement's screen.** Those differ exactly at a section boundary: finishing Sex's fifth
+statement and coming back must show the Death title card, not skip past it.
+`resumeScreenIndex()` handles it and is unit-tested at every boundary.
+
+**The attempt always comes from the signed cookie, never from the request body.** Both
+`/api/answer` and `/api/events` ignore any client-supplied id. For the answer route that
+stops anyone writing into someone else's attempt; for events it also avoids a foreign-key
+error from an id that no longer exists. The client's `sessionStorage` attempt id is now
+only used to correlate, never to address.
+
+**`tbt_started` is recorded server-side**, inside `createAttempt()`, rather than from the
+browser. It is the one event that must not be lost to a redirect, an ad blocker, or a
+beacon that never fires; everything else in SPEC §10 is fine coming from the client.
+
+**Begin resumes rather than restarting** when the browser already carries an attempt. A
+second row for the same person would count as a second start in the funnel and orphan the
+answers already given.
+
+**The answer is applied optimistically in the client and then replaced by the server's
+copy.** Back stays instant while a write is in flight, and the database stays
+authoritative.
+
+### `/send` is a stub, and there is no local database
+
+`/send` exists because statement 15 has to land somewhere (SPEC §4.3). It shows the
+settled heading and the `[COPY TBD]` slots; the form and its safeguards are Phase 3.
+
+**There is no Docker or Postgres on this machine**, so the Playwright suite cannot run
+locally — everything else (`npm run check`: typecheck, lint, 39 unit tests) can, because
+the flow logic was deliberately written as pure functions. The suite was run against the
+deployed Railway instance instead, and the attempts it created were deleted afterwards.
+Worth deciding before Phase 3: a small dev/test Postgres, so e2e runs without touching
+the live database or needing a deploy first.
+
 ## Landing button reads "Begin" — 2026-09-25
 
 Marie-Elizabeth's copy change: the landing button is "Begin" rather than "Start", matching

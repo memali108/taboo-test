@@ -1,12 +1,20 @@
-import { TestPreview } from "@/components/test/TestPreview";
+import { redirect } from "next/navigation";
+import { currentAttempt } from "@/lib/attempt";
+import { TestFlow } from "@/components/test/TestFlow";
 
+export const dynamic = "force-dynamic";
 export const metadata = { title: "The Taboo Test", robots: { index: false } };
 
 /**
- * Phase 1: a walkable preview of the section title card and the statement
- * screens. Nothing is saved — see TestPreview. Phase 2 wires this to the
- * Attempt model, /api/answer, resume and the real progress rules (SPEC §15).
+ * The 18 screens (SPEC §4.2). An attempt has to exist first — the landing page's Begin
+ * is what creates it — and a finished one goes where it belongs rather than being
+ * answered twice (SPEC §4.5).
  */
-export default function TestPage() {
-  return <TestPreview />;
+export default async function TestPage() {
+  const attempt = await currentAttempt();
+  if (!attempt) redirect("/");
+  if (attempt.status === "submitted") redirect(`/r/${attempt.publicId}`);
+  if (attempt.status === "completed") redirect("/send");
+
+  return <TestFlow attemptId={attempt.id} initialAnswers={attempt.answers} />;
 }
