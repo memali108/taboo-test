@@ -6,6 +6,7 @@ import { rateLimit } from "@/lib/ratelimit";
 import { requestMeta } from "@/lib/request";
 import { applyAnswer, AnswerError, isComplete } from "@/lib/answers";
 import { STATEMENT_COUNT } from "@/config/test";
+import { isE2ERequest } from "@/lib/e2e";
 
 export const dynamic = "force-dynamic";
 
@@ -55,5 +56,9 @@ export async function POST(req: Request) {
     select: { answers: true, status: true },
   });
 
-  return NextResponse.json({ ok: true, answers: saved.answers, completed });
+  // Echoed back only to a caller holding E2E_TOKEN, so the Playwright suite can assert
+  // that its rows really were flagged. Without this the flag is invisible from outside
+  // the database, and "the seed flag is set" stays an assumption rather than a test.
+  const seedEcho = (await isE2ERequest()) ? { isSeed: attempt.isSeed } : {};
+  return NextResponse.json({ ok: true, answers: saved.answers, completed, ...seedEcho });
 }

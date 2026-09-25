@@ -2,6 +2,39 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Test rows carry `isSeed`, set by a secret header — 2026-09-25
+
+Marie-Elizabeth's call: no separate dev database for now. Instead, a Playwright run marks
+itself with `E2E_TOKEN` sent as an `x-taboo-e2e` header, and every `Attempt` and `Contact`
+created while it is present is flagged `isSeed` — kept out of admin stats, and never
+delivered to GoHighLevel.
+
+**`Contact` gained an `isSeed` column**, which SPEC §9 did not have; only `Attempt` did.
+SPEC §9 and §13 are updated to match, because a flagged attempt whose contact is
+unflagged would still reach GHL through the contact.
+
+**The flag is set once at creation and read from the row thereafter**, never re-derived
+per request. Submission happens in a different request from creation, and a run that lost
+the header mid-flight would otherwise mail a real person from a test attempt.
+
+**`isE2ERequest()` fails closed.** It is a privileged marker — it suppresses the webhook —
+so: no token configured, or one under 16 characters, and it never matches whatever the
+header says. The specific trap that rule closes is an unset `E2E_TOKEN` matching an absent
+header, which would flag *every* real attempt as seed and quietly mail nobody. The
+comparison is timing-safe. `tests/seed.test.ts` pins every branch.
+
+**`shouldDeliverWebhook()` exists before the sender does.** Phase 4 builds delivery; the
+guard and its test are written now so the rule is recorded rather than remembered.
+
+**Wipe all data before launch** is now item one of SPEC §15.5, after the end-to-end inbox
+test and before the link goes out. That is what clears the development traffic —
+including the ~20 rows from today's Phase 2 runs, which predate the flag and are
+therefore not seed-marked.
+
+**`GHL_WEBHOOK_URL` stays unset**, on Railway and everywhere else, until Marie-Elizabeth
+configures GoHighLevel herself in Phase 4. `webhookUrl()` already returns
+`{ url: null, source: "none" }` in that state and the sender will simply not fire.
+
 ## Phase 2: the real test flow — 2026-09-25
 
 The preview is gone. `Begin` on the landing page writes an `Attempt`, sets the signed

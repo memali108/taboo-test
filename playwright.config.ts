@@ -8,8 +8,12 @@ const PORT = Number(process.env.E2E_PORT ?? 3100);
  *   E2E_BASE_URL=https://… npx playwright test
  *
  * It exists because the suite needs a database and a developer may not have Postgres
- * locally. Running it against the live site writes real attempt rows — clean them up
- * afterwards, and never point it at production once the test is public.
+ * locally.
+ *
+ * Set E2E_TOKEN to the value configured on the target, and every row the run creates is
+ * flagged `isSeed`: excluded from admin stats and never delivered to GoHighLevel. Without
+ * it the suite still passes, but its rows are indistinguishable from real ones — so
+ * treat a missing token as a mistake, not an option.
  */
 const REMOTE = process.env.E2E_BASE_URL;
 const baseURL = REMOTE ?? `http://localhost:${PORT}`;
@@ -25,6 +29,7 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "retain-on-failure",
+    ...(process.env.E2E_TOKEN ? { extraHTTPHeaders: { "x-taboo-e2e": process.env.E2E_TOKEN } } : {}),
     ...devices["iPhone 12"],
     viewport: { width: 390, height: 844 },
     isMobile: true,

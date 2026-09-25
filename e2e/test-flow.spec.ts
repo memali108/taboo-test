@@ -109,3 +109,24 @@ test("a completed attempt cannot go back to the test", async ({ page }) => {
   await page.goto("/test");
   await expect(page).toHaveURL(/\/send$/);
 });
+
+/**
+ * The suite writes to a real database, so the rows it creates must be flagged `isSeed`:
+ * excluded from admin stats and never delivered to GoHighLevel. `/api/answer` echoes the
+ * flag back to a caller holding E2E_TOKEN, which is the only way to see it from outside
+ * the database.
+ */
+test("rows created by this run are flagged isSeed", async ({ page }) => {
+  test.skip(!process.env.E2E_TOKEN, "E2E_TOKEN not set — this run's rows are NOT flagged");
+
+  await begin(page);
+  await passTitleCard(page);
+
+  const [res] = await Promise.all([
+    page.waitForResponse((r) => r.url().includes("/api/answer") && r.request().method() === "POST"),
+    page.getByRole("radio").first().click(),
+  ]);
+  const body = await res.json();
+  expect(body.ok).toBe(true);
+  expect(body.isSeed, "the attempt was created without the seed flag").toBe(true);
+});

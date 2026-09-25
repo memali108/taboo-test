@@ -194,6 +194,35 @@ Next 16 renamed `middleware.ts` to `proxy.ts`. `src/proxy.ts` matches `/admin/:p
 redirects to `/admin/login`. The proxy is a redirect for unauthenticated humans, not the
 only guard — server actions that mutate admin state must re-check `isAdmin()` themselves.
 
+## Test rows are flagged `isSeed`, and that flag is load-bearing
+
+There is no separate dev database. Playwright drives a real deployment, so its rows have
+to be distinguishable from real ones. The suite sends `E2E_TOKEN` as an `x-taboo-e2e`
+header (`src/lib/e2e.ts`), and every `Attempt` and `Contact` created while it is present
+is flagged `isSeed`.
+
+Two invariants hang off it (`src/lib/seed.ts`):
+
+1. **A seed row NEVER triggers the GoHighLevel webhook.** `shouldDeliverWebhook()` is the
+   guard, and the sender must call it. A test run that mails a real person, or burns a
+   real GHL contact, is the failure this exists to prevent.
+2. **Admin stats exclude seed rows.** Every admin query starts from `NOT_SEED`.
+
+The flag is set **once, at creation**, and read from the stored row from then on — never
+re-derived from whichever request happens to be in flight. An attempt flagged at the
+start stays flagged through submission even if that later request arrives without the
+header.
+
+`isE2ERequest()` **fails closed** in every ambiguous case: no `E2E_TOKEN`, or one under 16
+characters, and it never matches, whatever the header says. That is what stops an unset
+variable matching an absent header and silently marking every real attempt as seed —
+which would mail nobody and look like nothing was wrong. `tests/seed.test.ts` pins all of
+it. The token only ever *adds* a flag: it reads nothing, skips no rate limit, and does not
+reach admin.
+
+**Wipe the database before launch** (SPEC §15.5), so none of this development traffic —
+seed-flagged or not — is present when the first real subscriber arrives.
+
 ## GoHighLevel owns the results email
 
 - **The app sends each person's copy to GHL in custom fields** (SPEC §8.1), prefixed

@@ -3,6 +3,7 @@ import { prisma } from "./db";
 import { newPublicId } from "./public-id";
 import { requestMeta } from "./request";
 import { readAttemptCookie, setAttemptCookie } from "./session";
+import { isE2ERequest } from "./e2e";
 import { TEST_ID, TEST_VERSION } from "@/config/test";
 import type { Attempt } from "@prisma/client";
 
@@ -22,10 +23,14 @@ const trim = (v: string | null | undefined, max = 200) => (v ? v.slice(0, max) :
  */
 export async function createAttempt(entry: Entry): Promise<Attempt> {
   const meta = await requestMeta();
+  // Flagged once, at creation, and read from the row from then on — so an attempt stays
+  // marked through submission even if a later request arrives without the header.
+  const isSeed = await isE2ERequest();
   const attempt = await prisma.attempt.create({
     data: {
       publicId: newPublicId(),
       testVersion: TEST_VERSION,
+      isSeed,
       utmSource: trim(entry.utmSource),
       utmMedium: trim(entry.utmMedium),
       utmCampaign: trim(entry.utmCampaign),

@@ -29,12 +29,15 @@ model Contact {
   attemptCount    Int       @default(0)
   lastSubmittedAt DateTime?
   tags            String[]  @default([])
+  /// Created by an automated test run. Never delivered to GHL, never counted in admin.
+  isSeed          Boolean   @default(false)
   attempts        Attempt[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   @@index([createdAt])
   @@index([lastSubmittedAt])
+  @@index([isSeed])
 }
 
 model Attempt {
@@ -78,6 +81,7 @@ model Attempt {
   @@index([status])
   @@index([contactId])
   @@index([ipHash, startedAt])
+  @@index([isSeed])
 }
 
 model Event {

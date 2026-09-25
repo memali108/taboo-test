@@ -310,6 +310,7 @@ model Contact {
   attemptCount    Int       @default(0)
   lastSubmittedAt DateTime?
   tags            String[]  @default([])
+  isSeed          Boolean   @default(false)  // created by a test run; see §13 E2E_TOKEN
   attempts        Attempt[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -370,7 +371,14 @@ Plus `Event`, `RateLimit`, `DeliveryLog` and `Setting`, as in Tango. The seed cr
 ---
 
 ## 13. Environment variables
-`DATABASE_URL`, `SESSION_SECRET`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL` (build-time), `GHL_WEBHOOK_URL`, `SEED`, `REQUIRE_DATA_CONSENT`, `E2E_PORT`. Commit `.env.example` with a one-line note per variable.
+`DATABASE_URL`, `SESSION_SECRET`, `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL` (build-time), `GHL_WEBHOOK_URL`, `SEED`, `REQUIRE_DATA_CONSENT`, `E2E_PORT`, `E2E_TOKEN`. Commit `.env.example` with a one-line note per variable.
+
+**`E2E_TOKEN`** is a shared secret marking an automated test run. There is no separate dev database, so Playwright drives a real deployment; the suite sends the token as an `x-taboo-e2e` header, and every `Attempt` and `Contact` created while it is present is flagged `isSeed`. Two invariants follow, and both are load-bearing:
+
+- **A seed row never triggers the GoHighLevel webhook.** A test run must not mail a real person or consume a real GHL contact.
+- **Admin stats exclude `isSeed` rows**, so test traffic never appears in the funnel.
+
+The flag is set once at creation and read from the stored row thereafter, so it survives a later request that lacks the header. The check fails closed: no token, or one under 16 characters, and it never matches.
 
 **Domain:** `tabootest.marieelizabethmali.com` (CNAME to Railway, set wherever marieelizabethmali.com's DNS is managed). Set this *before* the first real email goes out, because result links in inboxes are permanent (lesson from Tango's domain move).
 
@@ -393,7 +401,9 @@ Plus `Event`, `RateLimit`, `DeliveryLog` and `Setting`, as in Tango. The seed cr
 2. **Test flow:** Attempt model, `/api/answer`, resume, back, progress, all 15 statements, scoring + Vitest suite.
 3. **Email step + results:** `/send` with every Tango safeguard, Contact upsert, attempt numbering and previous scores, `/r/[id]`, redirects.
 4. **GHL + admin:** payload builder (unit-tested with a snapshot), delivery + retry + log, Settings, Health, admin pages, CSV, delete, `docs/GHL_SETUP.md`. *Marie-Elizabeth sets up GHL, sends a test payload, and builds the email.*
-5. **Copy + launch:** paste the final copy, privacy page, Playwright suite green, `SEED=false`, custom domain, end-to-end test with a real inbox. Only then does the link go into Substack.
+5. **Copy + launch:** paste the final copy, privacy page, Playwright suite green, `SEED=false`, custom domain, end-to-end test with a real inbox.
+   - **Wipe all data before launch.** Every `Attempt`, `Contact`, `Event` and `DeliveryLog` row from development and testing is deleted, so the database is empty when the first real subscriber arrives. Do this *after* the end-to-end inbox test and *before* the link goes out, and confirm the app still starts clean afterwards.
+   - Only then does the link go into Substack.
 
 **Playwright at 390px must cover:**
 - full run to results
