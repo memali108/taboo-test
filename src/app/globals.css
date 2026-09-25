@@ -1,0 +1,104 @@
+@import "tailwindcss";
+
+@theme {
+  --color-*: initial;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Brand. Sea Glass replaces the Tango blue family; see CLAUDE.md for the
+     measured contrast rules that constrain where it may be used. */
+  --color-red: #62081b;        /* Primary Red */
+  --color-red-deep: #4a0614;
+  --color-red-soft: #f6e9ec;
+  --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink) */
+  --color-sea: #b6d3d8;        /* Accent Sea Glass */
+  --color-sea-soft: #e9f2f3;
+
+  /* Neutral scale */
+  --color-paper: #faf8f5;
+  --color-paper-2: #f3f0ea;
+  --color-paper-3: #e9e5dd;
+  --color-line: #d9d4cb;
+  --color-mute: #7a766f;
+  --color-ink-3: #685363;
+  --color-ink-2: #422f3d;
+  --color-ink: #2e1f2a;
+
+  /* Status */
+  --color-ok: #2f6b3a;
+  --color-ok-soft: #e6f1e8;
+  --color-bad: #9a2a2a;
+  --color-bad-soft: #f7e6e6;
+  --color-warn: #8a6410;
+  --color-warn-soft: #f8f0dc;
+
+  --font-display: var(--font-bebas), "Impact", "Arial Narrow", sans-serif;
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-rise: rise 520ms var(--ease-out-expo) both;
+  --animate-fade: fade 400ms ease-out both;
+  --animate-reveal: reveal 900ms var(--ease-out-expo) both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes reveal {
+    from { opacity: 0; transform: translateY(18px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+  line-height: 0.95;
+}
+
+.safe-b {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+.safe-t {
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+/* Red, not Sea Glass: 12.6:1 on paper. Sea Glass on paper is 1.49:1. */
+:focus-visible {
+  outline: 3px solid var(--color-red);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

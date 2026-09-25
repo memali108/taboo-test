@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AttemptStatus {
+  started
+  completed
+  submitted
+}
+
+enum Level {
+  low
+  medium
+  high
+}
+
+model Contact {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  firstName       String
+  // Mailing-list opt-in only. The results email is the service asked for and needs no consent.
+  consentAt       DateTime?
+  consentSource   String?
+  attemptCount    Int       @default(0)
+  lastSubmittedAt DateTime?
+  tags            String[]  @default([])
+  attempts        Attempt[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([createdAt])
+  @@index([lastSubmittedAt])
+}
+
+model Attempt {
+  id            String        @id @default(cuid())
+  // 24-char random, used in /r/[id]. Unguessable, so the results page needs no other guard.
+  publicId      String        @unique
+  contactId     String?
+  contact       Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  status        AttemptStatus @default(started)
+  // RAW ratings, "1".."5", up to 15 chars. Never pre-reversed. See CLAUDE.md.
+  answers       String        @default("")
+  testVersion   String
+  attemptNumber Int?
+  sexScore      Int?
+  deathScore    Int?
+  cashScore     Int?
+  sexLevel      Level?
+  deathLevel    Level?
+  cashLevel     Level?
+  // ["cash"], ["sex","cash"], or [] when all three tie.
+  terrain       String[]      @default([])
+
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  submittedAt    DateTime?
+  resultViewedAt DateTime?
+
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  referrer    String?
+  device      String?
+  country     String?
+  ipHash      String?
+
+  isSeed Boolean @default(false)
+  events Event[]
+
+  @@index([startedAt])
+  @@index([status])
+  @@index([contactId])
+  @@index([ipHash, startedAt])
+}
+
+model Event {
+  id        String   @id @default(cuid())
+  attemptId String?
+  attempt   Attempt? @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  name      String
+  props     Json     @default("{}")
+  createdAt DateTime @default(now())
+
+  @@index([name, createdAt])
+  @@index([attemptId])
+}
+
+model RateLimit {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+}
+
+model DeliveryLog {
+  id        String   @id @default(cuid())
+  kind      String // webhook
+  ok        Boolean
+  target    String?
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([kind, createdAt])
+}
+
+model Setting {
+  key       String   @id
+  value     String   @default("")
+  updatedAt DateTime @updatedAt
+}
