@@ -46,10 +46,26 @@ settled heading and the `[COPY TBD]` slots; the form and its safeguards are Phas
 
 **There is no Docker or Postgres on this machine**, so the Playwright suite cannot run
 locally — everything else (`npm run check`: typecheck, lint, 39 unit tests) can, because
-the flow logic was deliberately written as pure functions. The suite was run against the
-deployed Railway instance instead, and the attempts it created were deleted afterwards.
-Worth deciding before Phase 3: a small dev/test Postgres, so e2e runs without touching
-the live database or needing a deploy first.
+the flow logic was deliberately written as pure functions. The suite runs against a
+deployment instead: `E2E_BASE_URL=https://… npx playwright test`, which
+`playwright.config.ts` now supports.
+
+**Those runs left attempt rows in the live database, and they are still there.** Cleaning
+them up needs a connection the environment does not have: `postgres.railway.internal`
+resolves only inside Railway, the service has no public proxy, and `psql` is not
+installed. Adding a public TCP proxy to the database is not something to do quietly, so
+the rows stand. They are harmless now — roughly twenty attempts and their events, no
+`Contact` rows, no personal data — but they are indistinguishable from real ones and will
+skew the Phase 4 funnel if they survive that long.
+
+Two things to settle before Phase 3, when e2e starts creating contacts and firing
+webhooks:
+
+- **A dev/test Postgres**, so the suite runs locally without touching live data or
+  needing a deploy first.
+- **Marking test-run attempts `isSeed: true`** behind an env flag. The column already
+  exists for the seed (SPEC §9) and would make this class of row deletable in one
+  statement.
 
 ## Landing button reads "Begin" — 2026-09-25
 

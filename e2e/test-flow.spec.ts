@@ -92,8 +92,12 @@ test("finishing a section resumes on the next section's title card, not past it"
   await passTitleCard(page);
   for (let i = 0; i < 5; i++) await answer(page, i, 3); // all of Sex
 
+  // Wait for the advance before reloading: the screen only changes once the answer has
+  // been written, so this is what guarantees the fifth one is saved.
+  await expect(page.getByRole("heading", { name: "Death" })).toBeVisible();
+
   await page.reload();
-  // The Death title card, not Death's first statement.
+  // Still the Death title card, not Death's first statement.
   await expect(page.getByRole("heading", { name: "Death" })).toBeVisible();
   await expect(page.getByText("Your relationship with impermanence.")).toBeVisible();
 });
