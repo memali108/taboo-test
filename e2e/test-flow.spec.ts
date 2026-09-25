@@ -49,13 +49,20 @@ test("a full run reaches the send step with all 15 answers saved", async ({ page
 const FIRST_NAME = "Testy";
 const testEmail = () => `taboo-e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
 
-/** Fill and submit /send. The 2-second minimum-time guard is real, so wait it out. */
+/**
+ * Fill and submit /send, for the cases that are meant to succeed. The 2-second
+ * minimum-time guard is real, so wait it out; and wait for the redirect before
+ * returning, or a caller reading `page.url()` gets /send back.
+ */
 async function submitSend(page: Page, email: string, firstName = FIRST_NAME) {
   await page.getByLabel("First name").fill(firstName);
   await page.getByLabel("Email").fill(email);
   await page.waitForTimeout(2100);
   await page.getByRole("button", { name: /.+/ }).last().click();
+  await page.waitForURL(RESULTS_URL);
 }
+
+const RESULTS_URL = /\/r\/[a-z2-9]{24}$/;
 
 test("Back returns to the previous statement and the answer can be changed", async ({ page }) => {
   await begin(page);
@@ -150,7 +157,7 @@ test("submitting reaches a private results page with real scores and no personal
 
   const email = testEmail();
   await submitSend(page, email);
-  await expect(page).toHaveURL(/\/r\/[a-z2-9]{24}$/);
+  await expect(page).toHaveURL(RESULTS_URL);
 
   await expect(page.getByRole("heading", { name: "HERE ARE YOUR TABOO TEST RESULTS" })).toBeVisible();
   for (const line of ["15 / 25"]) await expect(page.getByText(line).first()).toBeVisible();
@@ -194,7 +201,7 @@ test("a submitted attempt redirects away from /test and /send", async ({ page })
   await begin(page);
   await runAll(page, () => 5);
   await submitSend(page, testEmail());
-  await expect(page).toHaveURL(/\/r\/[a-z2-9]{24}$/);
+  await expect(page).toHaveURL(RESULTS_URL);
   const resultsUrl = page.url();
 
   await page.goto("/test");
@@ -216,6 +223,10 @@ test("a retake with the same email gets its own results page", async ({ page }) 
   await expect(page).toHaveURL(/\/$/);
 
   await page.getByRole("button", { name: "Begin" }).click();
+  // Wait for the navigation before runAll's first click: the landing button and the
+  // title card's button are both called "Begin", so without this the next click can
+  // resolve against the page we are leaving.
+  await expect(page).toHaveURL(/\/test$/);
   await runAll(page, () => 5);
   await submitSend(page, email);
   const second = page.url();

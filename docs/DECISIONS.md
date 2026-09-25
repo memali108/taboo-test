@@ -2,6 +2,52 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Phase 3: the email step and the real results page — 2026-09-25
+
+`/send` carries every safeguard from taboo-quiz's unlock form (SPEC §7.4): honeypot,
+2-second minimum time, Postgres-backed rate limit, the strict format check, and the
+fail-open MX lookup. They run in that order, and **the rate limit sits after the cheap
+checks and before the DNS lookup** — a malformed address never consumes someone's quota,
+and the endpoint can never be used as an open DNS resolver.
+
+**Every submitted value is echoed back on failure.** This is the last step before someone
+gets their results; making them retype an email over a validation slip is how you lose
+them. The form repopulates from the action's echoed values rather than from controlled
+inputs, because React resets the form when the action resolves and a `checked` prop does
+not re-assert — the same finding as Tango's DECISIONS.
+
+**Tags are rebuilt, not accumulated.** `computeSubmission()` drops every level and terrain
+tag it manages before adding this attempt's, so a retake never leaves a contact tagged
+both `sex-high` and `sex-low`. Tags it does not manage — anything added by hand in
+GoHighLevel — are left alone. One tag per terrain section, so a two-way tie yields two and
+an all-equal result yields none, matching `Attempt.terrain`.
+
+**`consentAt` is set only when the optional box is ticked.** It means marketing consent,
+never consent to receive the results, which are the service being asked for. Tango had a
+bug here once — passing `consent: true` unconditionally — and it is worth not repeating.
+
+**The results page reads only the attempt.** `previousSubmission()` exists for Phase 4's
+payload and is deliberately not wired to the page: anyone can type any address into
+`/send`, so past scores there would expose someone else's results (SPEC §2). The page
+renders no first name and no email either, and an e2e test greps the HTML for both.
+
+**`/r/[id]` 404s for anything that is not a submitted attempt**, and checks the id's shape
+before touching the database.
+
+### Three e2e failures, all of them the test's fault
+
+Worth recording because the pattern repeated: each looked like an app bug and none was.
+
+1. Clicking through statements without waiting for each screen dropped answers. The card
+   correctly ignores taps while a write is in flight.
+2. Reloading immediately after the fifth answer raced the write. The screen only changes
+   once the server has answered, so waiting for the advance is what proves it landed.
+3. `submitSend()` read `page.url()` straight after clicking, before the server action's
+   redirect, so a successful submission looked like it had stayed on `/send`.
+
+The lesson each time: synchronise on the thing the app actually changes, not on a timer
+or on the click returning.
+
 ## Test rows carry `isSeed`, set by a secret header — 2026-09-25
 
 Marie-Elizabeth's call: no separate dev database for now. Instead, a Playwright run marks
