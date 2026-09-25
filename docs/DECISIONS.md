@@ -2,6 +2,27 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## A check mark marks the saved answer — 2026-09-25
+
+The saved answer's number circle carries a small white check on a red disc. This closes
+the ambiguity logged below: with hover and selected both red, hovering a different option
+on an already-answered statement put two red cards on screen with nothing to tell them
+apart. Now only the saved one is checked.
+
+Details worth keeping:
+
+- **It keys on the saved answer, not the pending one**, and is additionally gated on the
+  card actually being red. While a *different* card is mid-selection — the 260ms pause
+  before the screen advances — the old answer drops its fill, so it drops the mark with
+  it. Without that gate a red badge would float on a light card for a quarter second.
+- **The disc sets `bg-red` and `text-white` explicitly rather than inheriting.** During
+  that same 260ms the circle's own text colour reverts to `ink`, and an inherited check
+  would have been ink on red: 1.17:1, the palette's worst pairing.
+- **It is decorative.** It sits inside the `aria-hidden` circle, and `aria-checked` on the
+  button already carries the state for assistive tech. The mark is redundancy for sighted
+  users, not the accessible name.
+- The number stays. The check is a badge on the circle, not a replacement for the rating.
+
 ## Answer cards go red on hover and keyboard focus — 2026-09-25
 
 Marie-Elizabeth's call: hovering or keyboard-focusing an answer card gives it the full
@@ -15,8 +36,8 @@ consequence.** Come back to a statement you have already answered — via Back, 
 which one is your saved answer until you move the pointer away. This does not affect
 touch, where there is no hover, and 390px is the primary target; on a mouse it is a
 genuine ambiguity. Flagged, not worked around: she asked for red on hover knowing it
-matches selected. If it grates in use, the cheap fix is to drop the shadow from the hover
-state and keep it on selected.
+matches selected. **Resolved the same day** by the check mark above, which marks the saved
+answer and leaves hover unmarked.
 
 Implemented with the `hover:` and `focus-visible:` variants rather than React state, so
 the keyboard case is genuinely keyboard-only and a mouse click does not leave a card looking

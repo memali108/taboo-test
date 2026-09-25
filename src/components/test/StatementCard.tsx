@@ -83,6 +83,11 @@ export function StatementCard({ index, statement, selected, disabled, onSelect }
       <div role="radiogroup" aria-labelledby={`s-${index}`} className="mt-6 flex flex-col gap-3">
         {SCALE.map(({ value, label }, i) => {
           const isSel = shownValue === value;
+          // The SAVED answer, which is what has to stay identifiable when a different
+          // card goes red under the pointer. Gated on `isSel` as well so that while a
+          // different card is mid-selection the old one drops its mark with its fill,
+          // rather than leaving a red badge floating on a light card for 260ms.
+          const showSavedMark = selected === value && isSel;
           return (
             <button
               key={value}
@@ -107,12 +112,22 @@ export function StatementCard({ index, statement, selected, disabled, onSelect }
             >
               <span
                 className={[
-                  "font-display flex size-9 shrink-0 items-center justify-center rounded-full border text-lg",
+                  "font-display relative flex size-9 shrink-0 items-center justify-center rounded-full border text-lg",
                   isSel ? CIRCLE_RED : `border-line bg-white text-ink ${CIRCLE_RED_ON_HOVER_FOCUS}`,
                 ].join(" ")}
                 aria-hidden="true"
               >
                 {value}
+                {showSavedMark && (
+                  // `text-white` and `bg-red` are set explicitly rather than inherited:
+                  // the disc guarantees the check is always white-on-red (13.38:1),
+                  // whatever it happens to overlap.
+                  <span className="absolute -right-1 -top-1 flex size-4 items-center justify-center rounded-full bg-red text-white">
+                    <svg viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2.5 6.25 4.75 8.5 9.5 3.5" />
+                    </svg>
+                  </span>
+                )}
               </span>
               <span className="text-[1.0625rem] leading-snug">{label}</span>
             </button>
