@@ -12,7 +12,8 @@
   --color-red: #62081b;        /* Primary Red */
   --color-red-deep: #4a0614;
   --color-red-soft: #f6e9ec;
-  --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink) */
+  --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink).
+                                  A label colour now, not a surface: the Begin button. */
   --color-sea: #b6d3d8;        /* Accent Sea Glass */
   --color-sea-deep: #a4c6cd;   /* Sea Glass, pressed/hover only — never a text colour */
   --color-sea-soft: #ddebee;   /* The tint marieelizabethmali.com uses */
@@ -102,7 +103,7 @@ body {
  * whatever colour the element itself is. Red is 13.38:1 there.
  *
  * Two earlier "fixes" here were wrong for exactly that reason: a sea ring for the
- * aubergine title card and a white ring for the red answer cards. Both reasoned about
+ * section title card and a white ring for the red answer cards. Both reasoned about
  * the element's own fill, and both measured against a surface the ring never touches.
  * Sea on white is 1.58:1 and white on white is 1:1 — the second was invisible. If you
  * ever set `outline-offset` to 0 or a negative value, this stops being true.

@@ -2,6 +2,44 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Section title cards move from aubergine to red — 2026-09-25
+
+The Sex / Death / Cash title cards are now red `#62081b`. The headline stays white, the
+subtitle stays sea glass, and the Begin button stays sea glass with aubergine text.
+Measured on the new background:
+
+| | on red |
+|---|---|
+| white headline | 13.38 ✅ |
+| sea subtitle | 8.47 ✅ |
+| sea Begin button, as a shape against the card | 8.47 ✅ |
+| sea-deep, the button hovered | 7.35 ✅ |
+| aubergine label on that sea button | 9.88 ✅ (unchanged — the label sits on sea, not on the card) |
+
+Everything the card already used clears AA on red by a wide margin, so nothing needed
+re-picking.
+
+**The Begin button's justification changes, even though the button does not.** It was sea
+glass because red on aubergine is 1.17:1. It is now sea glass because a red button on a
+red card is invisible, and sea is 8.47:1 against it. Same answer, different reason — worth
+recording, because the old reason no longer exists and someone reading the code later
+might "simplify" it back to red.
+
+**Aubergine is no longer a surface anywhere in the app.** `--color-aubergine` survives
+only as the Begin button's label colour, and it is the same value as `--color-ink`. The
+practical rule that replaces it: red is the app's only dark surface, and nothing from the
+ink scale may sit on it — ink 1.17, ink-2 1.09, ink-3 1.91, mute 2.96 all fail. Only white
+and the sea family are legible there.
+
+**The headline moved from `text-paper` to `text-white`.** Identical output today, since
+paper is `#ffffff`. But it is white because it sits on red, not because it matches the
+page, and pinning it to `paper` would have let a future page-colour change drag it along
+silently.
+
+One thing to keep an eye on: red now carries a lot of the design — the Start button, the
+answer cards on hover and selection, and three full-bleed title cards. That is a look
+judgement rather than a contrast problem, and it is Marie-Elizabeth's to make at review.
+
 ## A check mark marks the saved answer — 2026-09-25
 
 The saved answer's number circle carries a small white check on a red disc. This closes

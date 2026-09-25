@@ -133,7 +133,7 @@ Render as five full-width answer cards, stacked, using Tango's `QuestionCard` st
 
 ### 5.3 Section title cards
 
-A full-screen card on aubergine before each section: section name in Bebas Neue, subtitle beneath. Subtitles come from the results doc: *Your relationship with desire.* / *Your relationship with impermanence.* / *Your relationship with enough.* A "Begin" button, or tap anywhere.
+A full-screen card on red (`#62081b`) before each section: section name in Bebas Neue in white, subtitle beneath in sea glass. Subtitles come from the results doc: *Your relationship with desire.* / *Your relationship with impermanence.* / *Your relationship with enough.* A "Begin" button, or tap anywhere.
 
 ---
 
@@ -210,7 +210,7 @@ Tango's rule carries over: **never use `mute` for text.** On the white page `mut
 Wordmark → display headline → intro → "15 statements · about 3 minutes" → red pill button → footer. Match the Tango landing layout.
 
 ### 7.3 Test `/test`
-- Section title cards: aubergine background, paper headline, sea subtitle.
+- Section title cards: red background, white headline (13.38:1), sea glass subtitle (8.47:1), sea glass "Begin" button with aubergine text (button against card 8.47:1, label on button 9.88:1). Nothing from the ink scale goes on this card — ink is 1.17:1 on red, ink-3 1.91, mute 2.96.
 - Statement screens: paper background, statement in Bebas `clamp(1.75rem, 6vw, 3rem)`, five answer cards.
 - Selected card = red with white text. Thin progress bar at top (red fill on `paper-3` track), with the section name as a small label.
 - A Back control sits top-left.

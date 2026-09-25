@@ -73,21 +73,33 @@ Every number below is a recomputed WCAG ratio against the current tokens.
 
 | Pairing | Ratio | Use |
 |---|---|---|
+| white on red `#62081b` | 13.38 | ✅ the section title card's headline |
+| sea on red | 8.47 | ✅ its subtitle, and the Begin button's fill against the card |
+| sea-deep `#a4c6cd` on red | 7.35 | ✅ that button, hovered |
+| aubergine `#2e1f2a` on sea | 9.88 | ✅ the Begin button's label |
+| aubergine on sea-deep | 8.57 | ✅ the same label, hovered |
 | ink `#2e1f2a` on sea | 9.88 | ✅ text on sea panels |
-| aubergine on sea | 9.88 | ✅ the Begin button's label |
-| red `#62081b` on sea | 8.47 | ✅ |
-| aubergine on sea-deep `#a4c6cd` | 8.57 | ✅ the Begin button, hovered |
-| sea on aubergine `#2e1f2a` | 9.88 | ✅ sea text or marks on dark cards |
+| red on sea | 8.47 | ✅ |
 | ink on sea-soft `#ddebee` | 12.78 | ✅ terrain panel body copy |
 | ink-3 `#685363` on sea-soft | 5.72 | ✅ the "most interesting terrain" label |
 | ink-3 on sea | 4.42 | ⚠️ large text only — just under AA for body |
+| **ink on red** | **1.17** | ❌ **never** — and the same for ink-2, ink-3 (1.91) and mute (2.96) |
 | white on sea | 1.58 | ❌ never |
 | sea on paper (white) | 1.58 | ❌ never as text, icons, or a meaningful mark on the page |
-| **red on aubergine** | **1.17** | ❌ **never** — see below |
 
-**Red is invisible on aubergine.** At 1.17:1 a red button on an aubergine card is a
-button-shaped hole. The section title cards therefore use a **sea glass** Begin button
-with **aubergine** text, and anything else *filled* on aubergine must do the same.
+**Red is the app's only dark surface.** The section title cards are red; there is no
+aubergine surface any more. `--color-aubergine` survives as a *label* colour — it is what
+the Begin button's text is — and it is the same value as `--color-ink`.
+
+**So nothing from the ink scale may sit on a title card.** ink is 1.17:1 on red, ink-2
+1.09, ink-3 1.91, mute 2.96 — all of them fail, and ink is the worst pairing in the whole
+palette. Only white and the sea family are legible there. The Begin button is sea glass
+for exactly this reason: a red button on a red card would be invisible, and sea is 8.47:1
+against it.
+
+The headline is `text-white`, not `text-paper`, even though the two are the same value
+today. It is white because it sits on red, not because it matches the page — so a future
+change to `paper` must not drag it along.
 
 **The focus ring is the exception, and it is one ring for the whole app: red.**
 `:focus-visible` uses `outline-offset: 3px`, which draws the ring **outside** the
