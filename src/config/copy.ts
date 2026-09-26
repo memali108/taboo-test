@@ -21,10 +21,10 @@ export const LANDING = {
   title: "The Taboo Test: How Uptight Are You About Sex, Death & Cash?",
   intro:
     "Read each statement and rate how true it is for you, right now — not who you want to be, not who you used to be. Be honest.",
-  introTbd: TBD('replacement for "Nobody sees this but you."'),
-  expectationTbd: TBD(
-    'decide whether to keep "Most people score lower than they expect in at least one section. The lowest score is where you could stand to loosen up."',
-  ),
+  // The intro ends at "Be honest." The JotForm's "Nobody sees this but you" is gone
+  // rather than reworded: it stopped being true once answers are stored and sent to
+  // GoHighLevel (SPEC §14.2).
+  expectation: "You may score lower than you expect in at least one section. That's where you could stand to loosen up.",
   meta: "15 statements · about 3 minutes",
   button: "Begin",
 } as const;

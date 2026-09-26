@@ -390,8 +390,10 @@ The flag is set once at creation and read from the stored row thereafter, so it 
 
 ## 14. Open items (Marie-Elizabeth to decide in the copy session)
 1. **Sex statement 5.** Replace it. As written, it measures reactions to the news rather than the relationship with desire, asks two things at once, and a survivor who rates it low lands on Low copy about "shame and silence." Needs a new statement you write. Because the level ranges assume 5 statements, it must stay one statement.
-2. **"Nobody sees this but you"** (JotForm intro) isn't true once answers are stored and sent to GHL. It needs new wording.
-3. **Unverified claims:** "Most people score lower than they expect in at least one section," "Most people score lower here than they expect" (Death), "The research on this is consistent" (Sex Low), "Research on financial anxiety consistently shows" (Cash Low), and terror management theory as "one of the more robust frameworks" (Death Low). Keep, source, or soften each.
+2. ~~**"Nobody sees this but you"** (JotForm intro) isn't true once answers are stored and sent to GHL. It needs new wording.~~ **Resolved 2026-09-26:** removed entirely rather than reworded. The intro now ends at "Be honest."
+3. **Unverified claims.** Keep, source, or soften each.
+   - ~~"Most people score lower than they expect in at least one section"~~ **Resolved 2026-09-26:** softened on the landing page to "You may score lower than you expect in at least one section", which claims nothing about other people.
+   - Still open: "Most people score lower here than they expect" (Death), "The research on this is consistent" (Sex Low), "Research on financial anxiety consistently shows" (Cash Low), and terror management theory as "one of the more robust frameworks" (Death Low).
 4. **"money" vs "cash":** the results doc uses "sex, death, and money" in the opening line and the upgrade block.
 5. **Absolute words + frequency scale:** "Often: I am *fully* confident…", "Sometimes: I *completely* embrace…" Consider dropping "fully / completely / totally" so the scale does the measuring.
 6. Email step body line, button, and fine print (heading is settled); terrain lines; change line; loop line; results email subject and opener.
@@ -426,8 +428,9 @@ Verbatim from *Taboo_Test_Results.docx* unless marked `[COPY TBD]`. Each "(Where
 
 ### Landing (`/`)
 - Title: **The Taboo Test: How Uptight Are You About Sex, Death & Cash?**
-- Intro: "Read each statement and rate how true it is for you, right now — not who you want to be, not who you used to be. Be honest." `[COPY TBD: replacement for "Nobody sees this but you."]`
-- `[COPY TBD: decide whether to keep "Most people score lower than they expect in at least one section. The lowest score is where you could stand to loosen up."]`
+- Intro: "Read each statement and rate how true it is for you, right now — not who you want to be, not who you used to be. Be honest."
+  *(The intro ends there. The JotForm's "Nobody sees this but you" is removed, not reworded — see §14.2 — and nothing replaces it.)*
+- Second line: "You may score lower than you expect in at least one section. That's where you could stand to loosen up."
 - Meta line: "15 statements · about 3 minutes" · Button: "Begin"
 - *(Removed: the scale legend, which now appears on every card, and "A few statements are reversed — pay attention.")*
 

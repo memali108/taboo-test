@@ -1,5 +1,4 @@
 import { LANDING } from "@/config/copy";
-import { Tbd } from "@/components/Tbd";
 import { Tracker } from "@/components/Tracker";
 import { beginAction } from "./actions";
 
@@ -25,13 +24,9 @@ export default async function LandingPage({
       <div className="animate-rise">
         <h1 className="font-display text-[clamp(2.4rem,9vw,4.5rem)] text-red">{LANDING.title}</h1>
 
-        <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink">
-          {LANDING.intro} <Tbd>{LANDING.introTbd}</Tbd>
-        </p>
+        <p className="mt-6 max-w-prose text-lg leading-relaxed text-ink">{LANDING.intro}</p>
 
-        <p className="mt-4 max-w-prose text-lg leading-relaxed text-ink">
-          <Tbd>{LANDING.expectationTbd}</Tbd>
-        </p>
+        <p className="mt-4 max-w-prose text-lg leading-relaxed text-ink">{LANDING.expectation}</p>
 
         <p className="mt-8 text-xs font-semibold uppercase tracking-[0.1em] text-ink">{LANDING.meta}</p>
 

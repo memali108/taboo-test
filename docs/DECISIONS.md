@@ -61,6 +61,29 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## Landing page copy is final — 2026-09-26
+
+Both `[COPY TBD]` slots on the landing page are filled, and the landing page no longer
+renders a placeholder at all.
+
+**"Nobody sees this but you" is removed, not reworded.** SPEC §14.2 flagged it as untrue
+once answers are stored and sent to GoHighLevel, and the resolution is deletion: the intro
+now ends at "Be honest." Nothing replaces it, so the page makes no privacy claim it cannot
+keep. What it does say about storage lives on `/privacy`, where it belongs.
+
+**The expectation line is softened rather than sourced:** "You may score lower than you
+expect in at least one section" claims nothing about other people, where "Most people
+score lower than they expect" was an empirical claim with nothing behind it. That is one
+of the five unverified claims in SPEC §14.3 closed off; four remain, all of them inside
+the results copy.
+
+`introTbd` is gone from `copy.ts` rather than left as an empty string, and the landing
+page no longer imports `Tbd` — the component is still used by `/send` and `/privacy`.
+
+**SPEC §14 items 2 and 3 are marked resolved**, which is an edit Marie-Elizabeth did not
+ask for. Leaving §14.2 saying the line "needs new wording" after the line has been deleted
+would be a stale open item that reads as outstanding work.
+
 ## Final terrain lines, and the retake link is gone — 2026-09-25
 
 Marie-Elizabeth's copy for all three terrain variants, and a product decision: retakes
