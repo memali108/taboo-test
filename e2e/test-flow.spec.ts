@@ -236,3 +236,51 @@ test("a retake with the same email gets its own results page", async ({ page }) 
   await page.goto(first);
   await expect(page.getByRole("heading", { name: "HERE ARE YOUR TABOO TEST RESULTS" })).toBeVisible();
 });
+
+/**
+ * Admin smoke test. Gated on ADMIN_PASSWORD so a normal run skips it; supply the value
+ * the deployment uses to exercise the dashboard against real data.
+ */
+test.describe("admin", () => {
+  test.skip(!process.env.ADMIN_PASSWORD, "ADMIN_PASSWORD not set");
+
+  test("is password protected and the dashboard renders", async ({ page }) => {
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/admin\/login/);
+
+    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
+    await page.getByRole("button", { name: /Log in/ }).click();
+    await expect(page).toHaveURL(/\/admin$/);
+    await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
+
+    for (const [path, heading] of [
+      ["/admin/levels", "Levels"],
+      ["/admin/statements", "Statements"],
+      ["/admin/contacts", "Contacts"],
+      ["/admin/retakes", "Retakes"],
+      ["/admin/settings", "Settings"],
+      ["/admin/health", "Health"],
+    ] as const) {
+      await page.goto(path);
+      await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    }
+  });
+
+  test("Health warns that no webhook is configured", async ({ page }) => {
+    await page.goto("/admin/login");
+    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
+    await page.getByRole("button", { name: /Log in/ }).click();
+    await page.goto("/admin/health");
+    // GoHighLevel is not set up yet, so this alert is the expected state for now.
+    await expect(page.getByText(/No GoHighLevel webhook is configured/i)).toBeVisible();
+  });
+
+  test("a wrong password does not get in", async ({ page }) => {
+    await page.goto("/admin/login");
+    await page.getByLabel("Password").fill("definitely-not-the-password");
+    await page.getByRole("button", { name: /Log in/ }).click();
+    await expect(page.getByText(/Wrong password/i)).toBeVisible();
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/admin\/login/);
+  });
+});

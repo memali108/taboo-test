@@ -7,14 +7,15 @@ Next.js 16 (App Router) · TypeScript · Tailwind 4 · Prisma 6 · PostgreSQL 16
 `SPEC.md` is the brief and the authority. `CLAUDE.md` holds the invariants;
 `docs/DECISIONS.md` records why things are the way they are.
 
-**Status: Phase 3 of 5** (SPEC §15). The whole respondent flow is real end to end: Begin
+**Status: Phase 4 of 5** (SPEC §15). The whole respondent flow is real end to end: Begin
 writes an `Attempt`, every answer is saved as it is given, `/send` collects first name and
 email behind the full safeguard set, and `/r/[id]` renders the scored result from the
-database. Still to come: the GoHighLevel webhook and the admin dashboard (Phase 4), and
-the final copy, privacy policy and custom domain (Phase 5).
+database. The GoHighLevel payload, delivery and the admin dashboard are built. Still to
+come: the final copy, the privacy policy, the custom domain and the launch wipe (Phase 5).
 
-**GoHighLevel is not configured.** `GHL_WEBHOOK_URL` is deliberately unset, so no results
-email is sent yet.
+**GoHighLevel is not configured yet.** `GHL_WEBHOOK_URL` is deliberately unset and no URL
+is saved in Settings, so nothing is sent and Admin → Health says so. See
+`docs/GHL_SETUP.md` for the walkthrough.
 
 ## Local setup
 
@@ -51,7 +52,7 @@ and `ADMIN_PASSWORD` need filling in.
 | `/send` | first name + email (Phase 3) |
 | `/r/[id]` | private results page; `id` is a 24-character random, `noindex`, `no-referrer` |
 | `/privacy` | privacy policy (stub until Phase 5) |
-| `/admin/*` | password-protected dashboard (Phase 4) |
+| `/admin` | password-protected dashboard: Overview, Levels, Statements, Contacts, Retakes, Settings, Health |
 | `/api/health` | 200 + DB ping (Railway healthcheck) |
 
 `/r/[id]` renders only a real submitted attempt; anything else is a 404.

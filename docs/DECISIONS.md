@@ -2,6 +2,62 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Phase 4: GoHighLevel delivery and the admin dashboard — 2026-09-25
+
+**`buildPayload()` is pure and snapshot-tested**, so a change to any copy string shows up
+as a diff in `tests/webhook-payload.test.ts` rather than as a wrong merge field in
+someone's inbox. Every copy value goes through `flatten()`, which collapses newlines and
+runs of whitespace — SPEC §8.1's "single paragraph of plain text" rule is enforced rather
+than assumed to hold, and a test asserts no field contains a line break or HTML.
+
+**Absent previous scores are sent as empty strings, not omitted keys.** GHL maps fields by
+name; a key that vanishes on a first attempt leaves the *previous* run's value sitting in
+the contact record, so someone's first-ever email could quote a stranger's numbers.
+
+**`deliverWebhook()` checks `shouldDeliverWebhook()` itself** rather than trusting callers
+to remember. The one deliberate exception is Settings → "Send test payload", which passes
+`isSeed: false` because that send is meant to reach GHL — that is its whole purpose.
+
+**The webhook is awaited, but wrapped.** SPEC §4.4 says it must never block and never
+throw. Awaiting it means the outcome is in `DeliveryLog` before the redirect, which is
+what makes the Health page trustworthy; the `try/catch` around it is what stops any of
+that costing someone their results page.
+
+**Admin excludes `isSeed` everywhere**, via a single `NOT_SEED` fragment. The failure mode
+if that is forgotten in a future query is quiet — wrong numbers, not an error — so it is
+written down in CLAUDE.md as an invariant rather than left as a habit.
+
+**Deleting a contact deletes their attempts first.** `Attempt.contactId` is
+`onDelete: SetNull`, so deleting the contact alone leaves the attempts behind with their
+answers intact and merely detached. That is not deletion. The action also requires the
+address to be typed, because it cannot be undone.
+
+**`/admin/contacts/export` checks `isAdmin()` for itself.** The proxy matcher covers
+pages; a route handler returning a CSV of every contact is exactly the thing that must not
+rely on someone else's guard. It 404s rather than 403s, so its existence is not confirmed
+to an unauthenticated caller.
+
+**The seed now creates ~300 attempts, all flagged.** It deliberately leaves 22% unfinished
+and 15% of finished ones unsubmitted, so the funnel on a seeded database has a shape worth
+looking at instead of three equal bars.
+
+**The Dockerfile's seed file list grew.** `prisma/seed.ts` imports `submit.ts` now, and
+the runner image only carries the files it is told to. `start.sh` treats a seed failure as
+non-fatal, so a missing import there fails *quietly* — the Dockerfile now says so where
+the list lives.
+
+### Two lint rules worth the argument
+
+`react-hooks/purity` flagged `Date.now()` in the Health page. The rule is right in general
+and wrong here — "the last 7 days" is relative to when someone looks, and a Server
+Component render *is* a request. Moved to `healthWindowStart()` in `admin-stats.ts` with a
+comment, rather than silenced inline.
+
+`@next/next/no-html-link-for-pages` flagged the CSV link. Also right in general: a plain
+anchor to an internal page skips client navigation. But the CSV is a download, and
+`next/link` would client-navigate to it instead of letting the browser save it. Disabled
+on that one line, with the reason.
+
 ## Results page: an all-sea meter ramp and sea-soft section blocks — 2026-09-25
 
 Marie-Elizabeth's design pass. The meter's zones become the three website sea tints —

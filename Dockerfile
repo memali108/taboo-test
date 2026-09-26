@@ -40,7 +40,11 @@ COPY --from=build --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 # server-only is bundled by Next, so the seed script needs its own copy beside the app
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules/server-only ./node_modules/server-only
 COPY --from=build --chown=nextjs:nodejs /app/prisma ./prisma
+# Everything prisma/seed.ts imports, transitively. The start script treats a seed
+# failure as non-fatal, so a missing file here fails quietly — check this list when the
+# seed grows an import.
 COPY --from=build --chown=nextjs:nodejs /app/src/lib/scoring.ts ./src/lib/scoring.ts
+COPY --from=build --chown=nextjs:nodejs /app/src/lib/submit.ts ./src/lib/submit.ts
 COPY --from=build --chown=nextjs:nodejs /app/src/lib/public-id.ts ./src/lib/public-id.ts
 COPY --from=build --chown=nextjs:nodejs /app/src/config ./src/config
 COPY --chown=nextjs:nodejs scripts/start.sh ./scripts/start.sh

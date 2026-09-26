@@ -13,6 +13,9 @@ import { computeSubmission } from "@/lib/submit";
 import { isComplete } from "@/lib/answers";
 import { requiresDataConsent } from "@/lib/config";
 import { SECTIONS } from "@/config/test";
+import { previousSubmission } from "@/lib/history";
+import { buildPayload } from "@/lib/webhook-payload";
+import { deliverWebhook } from "@/lib/webhook";
 
 export type SendState = {
   error?: string;
@@ -151,8 +154,31 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
     });
   });
 
-  // Phase 4 fires the GoHighLevel webhook here — never blocking, never throwing, and
-  // never for a seed attempt (`shouldDeliverWebhook`). GHL is not configured yet.
+  // GoHighLevel (SPEC §4.4). Awaited so the outcome is logged before the response, but
+  // wrapped so nothing here can cost them their results page — a failure is an alert on
+  // /admin/health, not an error in their face. Seed rows never reach GHL.
+  try {
+    const contact = await prisma.contact.findUnique({ where: { email }, select: { id: true } });
+    const previous = contact ? await previousSubmission(contact.id, attempt.id) : null;
+    await deliverWebhook(
+      buildPayload({
+        firstName,
+        email,
+        publicId: attempt.publicId,
+        answers: attempt.answers,
+        testVersion: attempt.testVersion,
+        scored,
+        marketingConsent,
+        submittedAt: now,
+        attemptNumber: plan.attemptNumber,
+        tags: plan.tags,
+        previous,
+      }),
+      { isSeed },
+    );
+  } catch (e) {
+    console.error("[send] webhook step failed", e);
+  }
 
   redirect(`/r/${attempt.publicId}`);
 }

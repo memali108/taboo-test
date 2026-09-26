@@ -259,7 +259,34 @@ seed-flagged or not — is present when the first real subscriber arrives.
   if any webhook failed in the last 7 days, or if no URL is set. Don't quietly downgrade
   that.
 - URL comes from admin Settings, falling back to `GHL_WEBHOOK_URL`. Timeout 8s, one
-  retry after 2s.
+  retry after 2s, every outcome in `DeliveryLog`.
+- **`deliverWebhook()` takes the attempt and checks `shouldDeliverWebhook()` itself**, so
+  a seed row cannot be delivered by a caller who forgot. The only deliberate exception is
+  Settings → Send test payload, which passes `isSeed: false` because that send is *meant*
+  to reach GHL.
+- `buildPayload()` is pure and snapshot-tested. Every copy field goes through `flatten()`,
+  which collapses newlines — the single-paragraph rule is enforced, not assumed.
+- **Previous scores are read at send time**, from `previousSubmission()`. They exist only
+  in the email; the results page must never show them.
+
+## Admin excludes seed rows, everywhere
+
+Every query in `src/lib/admin-stats.ts` and every admin page starts from `NOT_SEED`.
+Test-run and demo rows must never appear in the funnel, the level distribution, the
+statement means, the contact list, the CSV or the retake stats. If you add an admin query
+and forget it, the numbers quietly become wrong rather than visibly broken.
+
+The seed (`prisma/seed.ts`) also flags everything it creates, so a seeded database gives a
+shaped dashboard without polluting real numbers. **`SEED=false` in production** is still
+the real guard; the "bail if seed rows exist" check only stops it running twice.
+
+Admin mutations re-check `isAdmin()` themselves. `src/proxy.ts` is a redirect for
+unauthenticated humans, not the only guard — and it does not cover route handlers at all,
+which is why `/admin/contacts/export` checks for itself and 404s rather than 403s.
+
+**Deleting a contact deletes their attempts first.** `Attempt.contactId` is
+`onDelete: SetNull`, so deleting the contact alone would orphan the attempts — the answers
+would survive, detached. That is not what someone asking to be deleted means.
 
 ## `siteUrl()` falls back with `||`, not `??`
 
