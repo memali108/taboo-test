@@ -149,7 +149,7 @@ A full-screen card on red (`#62081b`) before each section: section name in Bebas
   - If two tie for lowest, both are terrain.
   - If all three tie, there's no single terrain and the page uses the all-equal variant line (Appendix A).
   - Terrain is chosen by lowest score even when every section is High.
-- **Lowest statement per section** = the statement with the lowest *item score* in that section. If several tie, use the first in order. Used by the Medium Sex and Medium Cash copy ("the one statement you rated lowest").
+- *(Removed 2026-09-26: "lowest statement per section". It was only ever read by the `taboo_*_lowest_statement` payload fields, which are gone — the Medium Sex and Medium Cash copy asks the reader to identify their own lowest-rated statement rather than being told it.)*
 - Scoring runs on the server at `/send` submit and is saved on the Attempt. The same pure function is unit-tested. (Nothing here is secret, so no server-only guard like Tango's is needed. Still, never trust a client-computed score.)
 
 **Tests (Vitest):**
@@ -157,7 +157,6 @@ A full-screen card on red (`#62081b`) before each section: section name in Bebas
 - Boundaries: 11/12 and 18/19.
 - Reversal: all-5s gives Sex 21, Death 21, Cash 13. All-1s gives Sex 9, Death 9, Cash 17.
 - Terrain ties (two-way and three-way).
-- Lowest-statement tie-break.
 
 ---
 

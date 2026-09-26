@@ -11,7 +11,7 @@ import {
 } from "@/config/test";
 import { SECTION_COPY } from "@/config/copy";
 import { applyAnswer } from "@/lib/answers";
-import { flush, setAttemptId, track } from "@/lib/tracking";
+import { flush, track } from "@/lib/tracking";
 import { SectionTitleCard } from "./SectionTitleCard";
 import { StatementCard } from "./StatementCard";
 
@@ -29,8 +29,6 @@ export function TestFlow({ attemptId, initialAnswers }: Props) {
   const [error, setError] = useState<string | null>(null);
   const shownAt = useRef(0);
   const liveRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setAttemptId(attemptId), [attemptId]);
 
   useEffect(() => {
     shownAt.current = Date.now();

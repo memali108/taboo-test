@@ -13,7 +13,7 @@ export type EventName =
   | "tbt_result_viewed";
 
 type Props = Record<string, string | number | boolean | null | undefined>;
-type Queued = { name: EventName; props: Props; attemptId?: string | null; ts: number };
+type Queued = { name: EventName; props: Props; ts: number };
 
 const queue: Queued[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
@@ -47,28 +47,19 @@ export function flush(beacon = false) {
   }
 }
 
-export function track(name: EventName, props: Props = {}, attemptId?: string | null) {
+/**
+ * No browser storage is written here. `/api/events` takes the attempt from the signed
+ * cookie and ignores anything the client sends, so the `sessionStorage` copy of the
+ * attempt id that used to live here was never read — and it made the privacy policy's
+ * "one cookie" claim untrue for no benefit at all.
+ */
+export function track(name: EventName, props: Props = {}) {
   if (typeof window === "undefined") return;
   bind();
   queue.push({
     name,
     props: { test_id: TEST_ID, test_version: TEST_VERSION, ...props },
-    attemptId: attemptId ?? getAttemptId(),
     ts: Date.now(),
   });
   if (!timer) timer = setTimeout(() => flush(false), 800);
-}
-
-export function getAttemptId(): string | null {
-  try {
-    return sessionStorage.getItem("tbt_attempt");
-  } catch {
-    return null;
-  }
-}
-export function setAttemptId(id: string | null) {
-  try {
-    if (id) sessionStorage.setItem("tbt_attempt", id);
-    else sessionStorage.removeItem("tbt_attempt");
-  } catch {}
 }

@@ -109,33 +109,6 @@ describe("terrain (SPEC §6)", () => {
   });
 });
 
-describe("lowest statement per section", () => {
-  it("is the lowest item score, after reversal", () => {
-    // Sex: ratings 4,1,5,5,5 → items 4,5,5,5,5. Lowest is statement 1 (index 0).
-    const s = score("41555" + "33333" + "33333");
-    expect(s.sections.sex.lowestStatementIndex).toBe(0);
-  });
-
-  it("breaks a tie on the first statement in order", () => {
-    const s = score("11555" + "33333" + "33333"); // items 1,5,5,5,5 … only one min
-    expect(s.sections.sex.lowestStatementIndex).toBe(0);
-    const t = score("55555" + "33333" + "33333"); // items 5,1,5,5,5 → index 1 is min
-    expect(t.sections.sex.lowestStatementIndex).toBe(1);
-    const u = score("11111" + "33333" + "33333"); // items 1,5,1,1,1 → first min is index 0
-    expect(u.sections.sex.lowestStatementIndex).toBe(0);
-  });
-
-  it("always points at a statement inside its own section", () => {
-    for (const section of SECTIONS) {
-      const idx = sectionIndices(section);
-      for (const pattern of ["12345", "54321", "33333", "11111", "55555"]) {
-        const r = score(answersWithSection(section, pattern)).sections[section];
-        expect(idx).toContain(r.lowestStatementIndex);
-      }
-    }
-  });
-});
-
 describe("input guard", () => {
   it("accepts only 15 characters of 1–5", () => {
     expect(isCompleteAnswers("333333333333333")).toBe(true);

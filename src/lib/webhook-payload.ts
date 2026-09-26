@@ -108,9 +108,9 @@ export const PAYLOAD_FIELDS = Object.keys(
     scored: {
       testVersion: "v1",
       sections: {
-        sex: { section: "sex", total: 15, level: "medium", items: [3, 3, 3, 3, 3], lowestStatementIndex: 0 },
-        death: { section: "death", total: 15, level: "medium", items: [3, 3, 3, 3, 3], lowestStatementIndex: 5 },
-        cash: { section: "cash", total: 15, level: "medium", items: [3, 3, 3, 3, 3], lowestStatementIndex: 10 },
+        sex: { section: "sex", total: 15, level: "medium", items: [3, 3, 3, 3, 3] },
+        death: { section: "death", total: 15, level: "medium", items: [3, 3, 3, 3, 3] },
+        cash: { section: "cash", total: 15, level: "medium", items: [3, 3, 3, 3, 3] },
       },
       terrain: [],
     },

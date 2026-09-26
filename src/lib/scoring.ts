@@ -10,6 +10,10 @@
  * - Terrain = the section(s) with the LOWEST total. Two tied → both. All three
  *   tied → none, and the page uses the all-equal copy variant.
  *
+ * There is no "lowest statement per section" here any more: nothing consumed it once the
+ * `taboo_*_lowest_statement` payload fields were dropped, and the Medium copy asks the
+ * reader to identify their own lowest-rated statement rather than being told it.
+ *
  * Nothing here is secret (SPEC §6), so there is no `server-only` guard — but a
  * client-computed score is still never trusted. Scoring runs at /send submit.
  */
@@ -32,11 +36,6 @@ export type SectionResult = {
   level: Level;
   /** The five item scores, after reversal, in statement order. */
   items: number[];
-  /**
-   * Zero-based index of the statement with the lowest item score in this
-   * section. Ties resolve to the first in order (SPEC §6).
-   */
-  lowestStatementIndex: number;
 };
 
 export type Scored = {
@@ -83,10 +82,7 @@ export function score(answers: string, version: string = TEST_VERSION): Scored {
     const idx = sectionIndices(section);
     const items = idx.map((i) => itemScore(ratings[i], reversed.has(i)));
     const total = items.reduce((a, b) => a + b, 0);
-    // First minimum wins, so a tie resolves to the earliest statement in order.
-    let lowest = 0;
-    for (let i = 1; i < items.length; i++) if (items[i] < items[lowest]) lowest = i;
-    sections[section] = { section, total, level: levelFor(total), items, lowestStatementIndex: idx[lowest] };
+    sections[section] = { section, total, level: levelFor(total), items };
   }
 
   const totals = SECTIONS.map((s) => sections[s].total);

@@ -61,6 +61,54 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## The privacy policy ships, and two things it made untrue are gone — 2026-09-26
+
+`/privacy` now renders the real policy, verbatim from `docs/privacy-policy.md`, dated
+September 26, 2026.
+
+**The policy is held as data** (`src/config/privacy.ts`) in taboo-quiz's shape — sections
+with paragraphs, leads and bullets — so the wording survives without JSX entity escaping,
+and every occurrence of the contact address becomes a `mailto:` link automatically.
+
+**`tests/privacy.test.ts` pins the page to the markdown.** It reconstructs the whole
+document from the data structure and compares it to `docs/privacy-policy.md` word for
+word, plus the heading order and the date. A legal document that quietly drifts from the
+file it was written in is the specific failure worth preventing here; editing one without
+the other now fails the build.
+
+It lives beside `copy.ts` rather than inside it, which bends SPEC §0.4's "copy lives in
+one file". The justification: this is a standalone legal document whose source of truth is
+outside the app, pinned by a test — not part of the test's own copy, and not scattered
+into a component either.
+
+### Two claims in the policy were not yet true
+
+The Cookies section says the test uses **one** cookie. Checking that before publishing
+turned up `sessionStorage["tbt_attempt"]`, written on every respondent's browser by the
+tracking helper — **and never read**: `/api/events` takes the attempt from the signed
+cookie and its schema does not even accept a client-sent id. So it was storage on
+someone's device that bought nothing and made the sentence false. Removed, along with
+`getAttemptId`/`setAttemptId` and the `attemptId` field on the queued event.
+
+The `tbt_admin` cookie stays and is out of scope for a respondent-facing policy, by
+Marie-Elizabeth's decision: it is only ever set at `/admin/login` and never touches a
+respondent's browser.
+
+### `Scored.lowestStatementIndex` removed
+
+Nothing consumed it once the `taboo_*_lowest_statement` payload fields went. SPEC §6 is
+updated to match rather than left describing an invariant the code no longer keeps, with a
+note saying why it went — the Medium Sex and Medium Cash copy asks the reader to identify
+their own lowest-rated statement rather than being told it.
+
+### I committed a file I should not have
+
+Marie-Elizabeth's stray copy of the policy at the repo root was swept into the previous
+commit by `git add -A`, and pushed. It is removed now, and it was byte-identical to
+`docs/privacy-policy.md`, so nothing was lost or contradicted — but it is in the git
+history and cannot be taken out of it without a force-push. The content is a
+public-facing policy, so there is nothing sensitive in it. Stage explicit paths.
+
 ## GoHighLevel gets less: four tags, 23 fields — 2026-09-26
 
 Marie-Elizabeth's call. Removed from the payload: the per-section level tags, the terrain
