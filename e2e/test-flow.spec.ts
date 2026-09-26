@@ -1,4 +1,6 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, request as playwrightRequest, type Page } from "@playwright/test";
+import { existsSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 /**
  * Phase 2 of the Playwright coverage SPEC §15 asks for, at 390px:
@@ -246,21 +248,41 @@ test("a retake with the same email gets its own results page", async ({ page }) 
  * make a suite that logs in per test fail on its second run of the afternoon. Only the
  * deliberate wrong-password test spends another attempt.
  */
-const ADMIN_STATE = "test-results/.admin-auth.json";
+const ADMIN_STATE = ".auth/admin.json";
 
 test.describe("admin", () => {
   test.skip(!process.env.ADMIN_PASSWORD, "ADMIN_PASSWORD not set");
 
+  /**
+   * Reuse a still-valid admin cookie across runs, and only log in when there isn't one.
+   *
+   * The cookie lasts 7 days; `/admin/login` allows 8 attempts per 15 minutes per IP. The
+   * state file lives OUTSIDE `test-results/`, which Playwright wipes at the start of
+   * every run — keeping it there meant logging in again each time, which is what kept
+   * tripping the limit while this suite was being written.
+   */
   test.beforeAll(async ({ browser, baseURL }) => {
     // `storageState: undefined` explicitly: browser.newContext() inherits context
-    // options from `use`, so without this the hook that CREATES the auth file tries to
-    // read it first.
-    const ctx = await browser.newContext({ baseURL, storageState: undefined });
+    // options from `use`, so without this the hook that CREATES the file reads it first.
+    const open = async (state?: string) =>
+      browser.newContext({ baseURL, storageState: state });
+
+    if (existsSync(ADMIN_STATE)) {
+      const ctx = await open(ADMIN_STATE);
+      const p = await ctx.newPage();
+      await p.goto("/admin");
+      const stillValid = /\/admin$/.test(p.url());
+      await ctx.close();
+      if (stillValid) return;
+    }
+
+    const ctx = await open(undefined);
     const p = await ctx.newPage();
     await p.goto("/admin/login");
     await p.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
     await p.getByRole("button", { name: /Log in/ }).click();
-    await p.waitForURL(/\/admin$/);
+    await p.waitForURL(/\/admin$/, { timeout: 30_000 });
+    mkdirSync(dirname(ADMIN_STATE), { recursive: true });
     await ctx.storageState({ path: ADMIN_STATE });
     await ctx.close();
   });
@@ -305,15 +327,34 @@ test.describe("admin", () => {
       await expect(page.getByText(/No GoHighLevel webhook is configured/i)).toBeVisible();
     });
 
-    test("the CSV export is served to an admin and hidden from everyone else", async ({ page, request }) => {
+    test("the CSV export is served to an admin and refused to everyone else", async ({ page, baseURL }) => {
       const ok = await page.request.get("/admin/contacts/export");
       expect(ok.status()).toBe(200);
       expect(ok.headers()["content-type"]).toContain("text/csv");
+      expect(ok.headers()["cache-control"]).toContain("no-store");
       expect(await ok.text()).toContain("email,first_name");
 
-      // `request` is a fresh context with no admin cookie.
-      const denied = await request.get("/admin/contacts/export", { maxRedirects: 0 });
-      expect(denied.status()).not.toBe(200);
+      // A genuinely cookie-less context. The `request` FIXTURE inherits storageState
+      // from `use`, so it would carry the admin cookie and prove nothing.
+      //
+      // Asserted on the content rather than the status code: the proxy answers with a
+      // 307 to /admin/login, and whether an API request surfaces that or the followed
+      // 200 depends on redirect handling. What must be true either way is that no
+      // contact data comes back.
+      // `storageState: undefined` explicitly — inside the runner even the standalone
+      // request API picks up the storageState from `use`, which is what made the first
+      // two versions of this test assert against an AUTHENTICATED call and pass or fail
+      // for the wrong reasons.
+      const anon = await playwrightRequest.newContext({ baseURL, storageState: undefined });
+      const denied = await anon.get("/admin/contacts/export");
+      expect(denied.headers()["content-type"] ?? "").toContain("text/html");
+      const body = await denied.text();
+      // No CSV: neither the header row nor a content-disposition attachment.
+      expect(body).not.toContain("email,first_name");
+      expect(denied.headers()["content-disposition"] ?? "").not.toContain("attachment");
+      // What they get instead is the login page.
+      expect(body).toContain("Password");
+      await anon.dispose();
     });
   });
 });

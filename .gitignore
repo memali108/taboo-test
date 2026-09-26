@@ -36,3 +36,6 @@ next-env.d.ts
 # playwright
 test-results/
 playwright-report/
+
+# Playwright admin session, reused across runs
+.auth/

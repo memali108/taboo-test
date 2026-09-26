@@ -32,10 +32,13 @@ written down in CLAUDE.md as an invariant rather than left as a habit.
 answers intact and merely detached. That is not deletion. The action also requires the
 address to be typed, because it cannot be undone.
 
-**`/admin/contacts/export` checks `isAdmin()` for itself.** The proxy matcher covers
-pages; a route handler returning a CSV of every contact is exactly the thing that must not
-rely on someone else's guard. It 404s rather than 403s, so its existence is not confirmed
-to an unauthenticated caller.
+**`/admin/contacts/export` checks `isAdmin()` for itself**, even though the proxy
+matcher already covers it — an unauthenticated caller is redirected to the login page and
+never reaches the handler. A route returning a CSV of every contact should not depend on a
+matcher pattern staying as it is, so it checks anyway and 404s. An e2e test pins the
+redirect, and had to use a cookie-less request context to do it: Playwright's `request`
+fixture inherits `storageState` from `use`, so the first version of that test was checking
+an authenticated call and would have passed no matter what the route did.
 
 **The seed now creates ~300 attempts, all flagged.** It deliberately leaves 22% unfinished
 and 15% of finished ones unsubmitted, so the funnel on a seeded database has a shape worth

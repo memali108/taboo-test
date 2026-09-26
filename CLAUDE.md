@@ -281,8 +281,13 @@ shaped dashboard without polluting real numbers. **`SEED=false` in production** 
 the real guard; the "bail if seed rows exist" check only stops it running twice.
 
 Admin mutations re-check `isAdmin()` themselves. `src/proxy.ts` is a redirect for
-unauthenticated humans, not the only guard — and it does not cover route handlers at all,
-which is why `/admin/contacts/export` checks for itself and 404s rather than 403s.
+unauthenticated humans, not the only guard.
+
+The proxy matcher (`/admin/:path*`) does cover `/admin/contacts/export`, so an
+unauthenticated caller gets a 307 to the login page and never reaches the handler. The
+handler checks `isAdmin()` anyway and 404s — a backstop for the day someone narrows that
+matcher, which is exactly the kind of change whose blast radius is invisible. An e2e test
+pins the 307 using a cookie-less request context.
 
 **Deleting a contact deletes their attempts first.** `Attempt.contactId` is
 `onDelete: SetNull`, so deleting the contact alone would orphan the attempts — the answers
