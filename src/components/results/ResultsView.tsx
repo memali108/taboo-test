@@ -67,7 +67,13 @@ export function ResultsView({ scored }: { scored: Scored }) {
           return (
             <section
               key={s}
-              className={here ? "rounded-2xl bg-sea-soft p-5 sm:p-6" : undefined}
+              // Every section sits in a sea-soft box. The terrain one is marked by a 2px
+              // red border (10.95:1 against the fill) plus its label — the others carry a
+              // transparent border of the same width so the boxes stay the same size.
+              className={[
+                "rounded-2xl bg-sea-soft p-5 sm:p-6 border-2",
+                here ? "border-red" : "border-transparent",
+              ].join(" ")}
               aria-labelledby={`sec-${s}`}
             >
               {here && (

@@ -171,9 +171,11 @@ Start from taboo-quiz `globals.css` (Bebas Neue display, Montserrat body, ink sc
 --color-red-deep: #4a0614;
 --color-red-soft: #f6e9ec;
 --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink) */
---color-sea: #b6d3d8;        /* Accent Sea Glass */
---color-sea-deep: #a4c6cd;   /* hover/pressed only — never a text colour */
---color-sea-soft: #ddebee;   /* the tint the website uses */
+/* Three sea tints from the website, stepping evenly: 1.22 / 1.58 / 2.03
+   against the white page, 1.29 between neighbours. */
+--color-sea-soft: #ddebee;   /* results section blocks, the meter's Low zone */
+--color-sea: #b6d3d8;        /* Accent Sea Glass — the meter's Medium zone */
+--color-sea-deep: #9abcc1;   /* the meter's High zone, and the Begin button hovered */
 /* remove --color-blue, --color-blue-deep, --color-blue-soft, --color-accent */
 
 /* Neutrals. The page is white, so the tints carry all the figure/ground. */
@@ -193,7 +195,7 @@ Start from taboo-quiz `globals.css` (Bebas Neue display, Montserrat body, ink sc
 | ink `#2e1f2a` on sea | 9.88 | ✅ text on sea panels |
 | aubergine on sea | 9.88 | ✅ the Begin button's label |
 | red on sea | 8.47 | ✅ |
-| aubergine on sea-deep | 8.57 | ✅ the Begin button, hovered |
+| aubergine on sea-deep `#9abcc1` | 7.68 | ✅ the Begin button, hovered |
 | sea on aubergine | 9.88 | ✅ sea text or marks on dark cards |
 | ink on sea-soft | 12.78 | ✅ terrain panel body copy |
 | ink-3 on sea-soft | 5.72 | ✅ the "most interesting terrain" label |
@@ -228,7 +230,7 @@ Top to bottom:
    - a level label
    - a horizontal meter: track from 5 to 25 split into three zones, zone labels Low / Medium / High under it, and a red marker at the score.
 
-   Zones are `paper-3` / `sea-soft` / `sea`, all behind the marker. The level is always written in text, so color never carries the meaning alone.
+   Zones are the three sea tints — Low `#ddebee` / Medium `#b6d3d8` / High `#9abcc1` — which step evenly (1.22 / 1.58 / 2.03 against the white page, 1.29 between neighbours). Hairline dividers mark where 11.5 and 18.5 fall. The marker is a bold red dot with a white ring, which clears 3:1 on every zone (10.95 / 8.47 / 6.58) so it never depends on the ring to be seen. The level is always written in text, so color never carries the meaning alone.
 3. **Terrain line** naming their lowest section(s).
 4. **Three section blocks** in fixed order (Sex, Death, Cash). Each has:
    - title and italic subtitle
@@ -236,7 +238,7 @@ Top to bottom:
    - their level as a subhead
    - that level's paragraph(s) only
 
-   The terrain section's block gets a sea-soft panel and a small "Your most interesting terrain" label (ink-3 on sea-soft, 6.1:1). Do **not** show the other levels' copy.
+   **All three blocks sit in a sea-soft (`#ddebee`) box with a red title** (10.95:1). The terrain one is additionally marked with a **2px red border** (10.95:1 against the fill, 13.38:1 against the page) and its small "Your most interesting terrain" label (ink-3 on sea-soft, 5.72:1). The other two carry a transparent border of the same width so every box is the same size. Do **not** show the other levels' copy.
 5. **Closing:** the loop line pointing to the email, then the deliverability note (reuse Tango's `DELIVERABILITY_NOTE`), then a small "Take it again" link.
 
 No first name, email, or past scores on this page. `robots: noindex, nofollow`. `Referrer-Policy: no-referrer`.

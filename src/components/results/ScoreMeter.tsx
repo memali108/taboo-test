@@ -2,41 +2,41 @@ import { MAX_SECTION_SCORE, MIN_SECTION_SCORE, type Level } from "@/lib/scoring"
 import { RESULTS } from "@/config/copy";
 
 /**
- * The 5–25 meter from SPEC §7.5: three zones behind a red marker at the score.
+ * The 5–25 meter from SPEC §7.5: three zones with a red marker at the score.
  *
- * Zones are paper-3 / sea-soft / sea. Colour never carries the meaning on its
- * own — the level is always written out in text beside it, and the zone labels
- * sit under the track.
+ * The zones are the three sea tints, which step evenly — 1.22 / 1.58 / 2.03 against the
+ * white page, 1.29 between neighbours — so the ramp reads as a ramp. (The earlier mix of
+ * a warm neutral and a cool tint sat 1.02 apart and could not be separated by luminance
+ * at all; the hairlines were carrying the whole boundary.)
  *
- * Zone edges sit on the half-point between adjacent levels (11|12 → 11.5,
- * 18|19 → 18.5) so a score of 11 lands inside Low rather than on its boundary.
+ * The hairlines stay, but their job has changed: they now mark exactly where 11.5 and
+ * 18.5 fall, so you can see which side of a level edge the marker is on.
  *
- * The track is OUTLINED and its zone edges are DRAWN, rather than relying on the
- * fills to separate themselves. On the white page, paper-3 against sea-soft is
- * 1.02:1 — a warm neutral and a cool tint of the same lightness cannot be told
- * apart by luminance, which is exactly the case colour-vision deficiency makes
- * worse. The dividers are `mute`, which is 2.86–3.77:1 against all three fills;
- * `line` would have been 1.07:1 against sea and vanished at that edge. `mute` is
- * barred from text, never from a rule.
+ * Colour never carries the meaning on its own — the level is always written out in text
+ * beside the meter, and the zone labels sit under the track.
  */
 const SPAN = MAX_SECTION_SCORE - MIN_SECTION_SCORE; // 20
 const pct = (score: number) => ((score - MIN_SECTION_SCORE) / SPAN) * 100;
 
 const ZONES = [
-  { key: "low" as const, from: MIN_SECTION_SCORE, to: 11.5, className: "bg-paper-3" },
-  { key: "medium" as const, from: 11.5, to: 18.5, className: "bg-sea-soft" },
-  { key: "high" as const, from: 18.5, to: MAX_SECTION_SCORE, className: "bg-sea" },
+  { key: "low" as const, from: MIN_SECTION_SCORE, to: 11.5, className: "bg-sea-soft" },
+  { key: "medium" as const, from: 11.5, to: 18.5, className: "bg-sea" },
+  { key: "high" as const, from: 18.5, to: MAX_SECTION_SCORE, className: "bg-sea-deep" },
 ];
 
 export function ScoreMeter({ score, level }: { score: number; level: Level }) {
   return (
     <div>
+      {/*
+        The marker sits in this wrapper rather than inside the track, because the track
+        clips to its rounded ends and the dot is taller than the track on purpose.
+      */}
       <div
-        className="relative h-3 w-full overflow-hidden rounded-full border border-line"
+        className="relative"
         role="img"
         aria-label={`${score} out of ${MAX_SECTION_SCORE}, ${RESULTS.levelLabels[level]}`}
       >
-        <div className="absolute inset-0 flex">
+        <div className="flex h-3 w-full overflow-hidden rounded-full border border-line">
           {ZONES.map((z, i) => (
             <div
               key={z.key}
@@ -45,8 +45,13 @@ export function ScoreMeter({ score, level }: { score: number; level: Level }) {
             />
           ))}
         </div>
+        {/*
+          Red on every zone: 10.95 on Low, 8.47 on Medium, 6.58 on High, so the dot clears
+          the 3:1 SC 1.4.11 threshold wherever it lands and does not depend on the white
+          ring to be seen. The ring is what keeps it crisp against the darker zones.
+        */}
         <div
-          className="absolute inset-y-0 w-1 -translate-x-1/2 rounded-full bg-red"
+          className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-red shadow-[0_1px_3px_rgba(46,31,42,0.35)]"
           style={{ left: `${pct(score)}%` }}
           aria-hidden="true"
         />

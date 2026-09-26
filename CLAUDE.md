@@ -75,13 +75,16 @@ Every number below is a recomputed WCAG ratio against the current tokens.
 |---|---|---|
 | white on red `#62081b` | 13.38 | ✅ the section title card's headline |
 | sea on red | 8.47 | ✅ its subtitle, and the Begin button's fill against the card |
-| sea-deep `#a4c6cd` on red | 7.35 | ✅ that button, hovered |
+| sea-deep `#9abcc1` on red | 6.58 | ✅ that button, hovered |
 | aubergine `#2e1f2a` on sea | 9.88 | ✅ the Begin button's label |
-| aubergine on sea-deep | 8.57 | ✅ the same label, hovered |
+| aubergine on sea-deep `#9abcc1` | 7.68 | ✅ the same label, hovered |
 | ink `#2e1f2a` on sea | 9.88 | ✅ text on sea panels |
 | red on sea | 8.47 | ✅ |
-| ink on sea-soft `#ddebee` | 12.78 | ✅ terrain panel body copy |
+| red on sea-soft `#ddebee` | 10.95 | ✅ every results section title, and the terrain border |
+| ink on sea-soft | 12.78 | ✅ results section body copy |
+| ink-2 on sea-soft | 10.08 | ✅ the italic section subtitle |
 | ink-3 `#685363` on sea-soft | 5.72 | ✅ the "most interesting terrain" label |
+| red on sea-deep | 6.58 | ✅ the meter's marker on its darkest zone |
 | ink-3 on sea | 4.42 | ⚠️ large text only — just under AA for body |
 | **ink on red** | **1.17** | ❌ **never** — and the same for ink-2, ink-3 (1.91) and mute (2.96) |
 | white on sea | 1.58 | ❌ never |
@@ -141,6 +144,18 @@ person is meant to read.**
 contrast minimums do not apply. It is what draws the meter's zone dividers. `ink-2`
 (`#422f3d`, 12.31:1 on white) is also fine; it is not a low-contrast tone.
 
+### The results page is sea-soft throughout
+
+All three section blocks sit in a `sea-soft` box with a red title (10.95:1). The terrain
+one is singled out by a **2px red border** — 10.95:1 against the fill, 13.38:1 against the
+page — plus its "Your most interesting terrain" label. The other two carry a transparent
+border of the same width, so every box is the same size and nothing shifts when the
+terrain moves.
+
+Only the terrain block is bordered. If a second thing here ever needs emphasis, give it a
+different device rather than a second red border, or the one signal the page has stops
+meaning anything.
+
 ### Neutrals have to work harder on a white page
 
 The page is `#ffffff`, so a white card is no card at all. The tints carry all the
@@ -152,12 +167,16 @@ figure/ground the cream page used to:
 | `paper-3` | `#eeeae2` | 1.20 | that card hovered; the meter's Low zone |
 | `line` | `#d9d4cb` | 1.48 | every border and rule |
 
-**The meter's zone edges are drawn, not implied.** `paper-3` against `sea-soft` is
-**1.02:1** — a warm neutral and a cool tint at the same lightness cannot be separated by
-luminance, and that is precisely what colour-vision deficiency makes worse. So the track
-is outlined in `line` and its zone boundaries are `mute` hairlines. Do not "simplify" them
-away: without them the Low and Medium zones are one continuous band. (`line` was the first
-choice and is wrong here — it is 1.07:1 against `sea` and vanishes at the second edge.)
+**The meter's three zones are the three sea tints**, and they step evenly: 1.22 / 1.58 /
+2.03 against the white page, 1.29 between neighbours. That replaced a warm-neutral Low
+against a cool-tint Medium sitting **1.02:1** apart — indistinguishable by luminance,
+which is exactly what colour-vision deficiency makes worse. Keep the ramp inside one hue
+family; the moment Low goes back to a neutral, that problem comes back with it.
+
+The `mute` hairlines stay, but their job has changed: they now mark exactly where 11.5 and
+18.5 fall, rather than rescuing a boundary that was otherwise invisible. The marker is a
+red dot with a white ring and clears 3:1 on all three zones (10.95 / 8.47 / 6.58), so it
+never depends on the ring to be seen — the ring only keeps it crisp at the darker end.
 
 None of this carries meaning on its own. The level is always written out in text beside
 the meter.

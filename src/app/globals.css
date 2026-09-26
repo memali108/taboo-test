@@ -14,9 +14,11 @@
   --color-red-soft: #f6e9ec;
   --color-aubergine: #2e1f2a;  /* Secondary Deep Aubergine (same value as --color-ink).
                                   A label colour now, not a surface: the Begin button. */
-  --color-sea: #b6d3d8;        /* Accent Sea Glass */
-  --color-sea-deep: #a4c6cd;   /* Sea Glass, pressed/hover only — never a text colour */
-  --color-sea-soft: #ddebee;   /* The tint marieelizabethmali.com uses */
+  /* Three sea tints, all from marieelizabethmali.com, stepping evenly:
+     1.22 → 1.58 → 2.03 against the white page, 1.29 between neighbours. */
+  --color-sea-soft: #ddebee;   /* lightest — results section blocks, the meter's Low zone */
+  --color-sea: #b6d3d8;        /* Accent Sea Glass — the meter's Medium zone */
+  --color-sea-deep: #9abcc1;   /* darkest — the meter's High zone, and the Begin button hovered */
 
   /* Neutral scale. The page is pure white, matching marieelizabethmali.com, so the
      tints below carry all of the figure/ground that the cream page used to. */

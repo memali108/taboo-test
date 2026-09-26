@@ -2,6 +2,48 @@
 
 Choices made where `SPEC.md` left room. Newest first.
 
+## Results page: an all-sea meter ramp and sea-soft section blocks — 2026-09-25
+
+Marie-Elizabeth's design pass. The meter's zones become the three website sea tints —
+Low `#ddebee`, Medium `#b6d3d8`, High `#9abcc1` — the thin marker becomes a bold red dot
+with a white ring, and all three section blocks move into the sea-soft box, with the
+terrain one marked by a 2px red border instead of being the only one tinted.
+
+**The zone ramp is now monotonic and evenly stepped:** 1.22 / 1.58 / 2.03 against the
+white page, 1.29 between neighbours. That is a real fix, not just a repaint. The previous
+Low was a warm neutral sitting **1.02:1** from a cool-tint Medium — a gap luminance cannot
+express, and precisely the case colour-vision deficiency flattens. Staying inside one hue
+family is what removes the problem, so the note in CLAUDE.md now says to keep it there.
+
+**The hairline dividers stay, with a different job.** They were rescuing an invisible
+boundary; now they mark exactly where 11.5 and 18.5 fall, which is genuinely useful for
+seeing which side of a level edge a score sits on. `mute` still draws them: 3.70 / 2.86 /
+2.22 across the three zones — weakest on High, but the zones themselves now carry the
+separation.
+
+**The marker does not depend on its ring.** Red on the three zones is 10.95 / 8.47 / 6.58,
+all clear of the 3:1 that SC 1.4.11 asks of a meaningful graphic, so the dot is legible
+wherever it lands even if the white ring is lost against a pale zone. The ring is there to
+keep it crisp at the darker end, not to make it visible.
+
+The dot also had to move **out of the track**: the track clips to its rounded ends, and
+the dot is deliberately taller than the track. It now sits in an unclipped wrapper over
+the top.
+
+**`sea-deep` changed value, from my invented `#a4c6cd` to the website's `#9abcc1`.** The
+palette had two sea tints five percent apart for no reason — one of them mine. There is
+now one, used for both the meter's High zone and the Begin button hover. That hover gets
+slightly stronger as a side effect (1.15 → 1.29 step) and its label still passes
+comfortably: aubergine on `#9abcc1` is 7.68:1, and the button against the red card is
+6.58:1.
+
+**Every section block is now sea-soft, so being tinted no longer means "this is your
+terrain".** The red border carries that alone, which is why it is 2px rather than 1 —
+10.95:1 against the fill, 13.38:1 against the page. Non-terrain blocks carry a transparent
+border of the same width so the boxes stay identical in size and nothing shifts depending
+on which section is lowest. The "Your most interesting terrain" label stays; with only one
+visual device left, the words matter more.
+
 ## Phase 3: the email step and the real results page — 2026-09-25
 
 `/send` carries every safeguard from taboo-quiz's unlock form (SPEC §7.4): honeypot,
