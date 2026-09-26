@@ -5,8 +5,6 @@ import { terrainLine } from "@/lib/terrain";
 import { Wordmark } from "@/components/Wordmark";
 import { Tbd } from "@/components/Tbd";
 import { ScoreMeter } from "./ScoreMeter";
-import { RetakeLink } from "./RetakeLink";
-import { retakeAction } from "@/app/r/[id]/actions";
 
 const isTbd = (s: string) => s.startsWith("[COPY TBD");
 const Copy = ({ text }: { text: string }) => (isTbd(text) ? <Tbd>{text}</Tbd> : <>{text}</>);
@@ -111,9 +109,7 @@ export function ResultsView({ scored }: { scored: Scored }) {
           <Copy text={RESULTS.loopLine} />
         </p>
         <p className="mt-3 max-w-prose text-base leading-relaxed text-ink">{RESULTS.deliverabilityNote}</p>
-        <div className="mt-10">
-          <RetakeLink label={RESULTS.retakeLink} action={retakeAction} />
-        </div>
+        {/* No "Take it again" link: retakes come from the quarterly email (SPEC §4.5). */}
       </div>
     </div>
   );

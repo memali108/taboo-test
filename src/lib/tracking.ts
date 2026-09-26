@@ -10,8 +10,7 @@ export type EventName =
   | "tbt_completed"
   | "tbt_send_viewed"
   | "tbt_submitted"
-  | "tbt_result_viewed"
-  | "tbt_retake_clicked";
+  | "tbt_result_viewed";
 
 type Props = Record<string, string | number | boolean | null | undefined>;
 type Queued = { name: EventName; props: Props; attemptId?: string | null; ts: number };

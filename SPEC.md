@@ -83,12 +83,12 @@ Next.js 16 (App Router) · TypeScript · Tailwind 4 · Prisma 6.x (pinned to 6, 
 ```
 
 **Flow:**
-1. `/`: Start creates an `Attempt` and sets the signed `tbt_attempt` cookie (7 days).
+1. `/`: Begin creates an `Attempt` and sets the signed `tbt_attempt` cookie (7 days). An unfinished attempt resumes; a **submitted** one starts a fresh attempt, because the cookie outlives a submission and there is no longer a link on the results page to clear it.
 2. `/test`: 3 section title cards + 15 statement screens = 18 screens. A progress bar counts statements only ("4 of 15"). Tapping an answer auto-advances after ~260ms, like Tango. Back is allowed. Answering statement *n* again overwrites it. Leaving and returning resumes where they were (cookie).
 3. After statement 15, the attempt is `completed` and they go to `/send`.
 4. `/send` submit → validate → score → upsert Contact → save → **fire the GHL webhook (never blocks, never throws)** → redirect to `/r/{publicId}`.
    - The webhook sends in the background of the request, and a failure is logged. The person still sees their results either way.
-5. `/r/[id]` renders from the database. Visiting `/test` or `/send` with a submitted attempt redirects to its results page. A "Take it again" link on the results page clears the cookie. Keep it small, at the bottom.
+5. `/r/[id]` renders from the database. Visiting `/test` or `/send` with a submitted attempt redirects to its results page. **There is no "Take it again" link** — retakes come from the quarterly email, which links back to `/`.
 
 ---
 
@@ -239,7 +239,7 @@ Top to bottom:
    - that level's paragraph(s) only
 
    **All three blocks sit in a sea-soft (`#ddebee`) box with a red title** (10.95:1). The terrain one is additionally marked with a **2px red border** (10.95:1 against the fill, 13.38:1 against the page) and its small "Your most interesting terrain" label (ink-3 on sea-soft, 5.72:1). The other two carry a transparent border of the same width so every box is the same size. Do **not** show the other levels' copy.
-5. **Closing:** the loop line pointing to the email, then the deliverability note (reuse Tango's `DELIVERABILITY_NOTE`), then a small "Take it again" link.
+5. **Closing:** the loop line pointing to the email — the page's call to action, set larger and heavier than body copy — then the deliverability note (reuse Tango's `DELIVERABILITY_NOTE`) beneath it at body size. Nothing after that: no retake link.
 
 No first name, email, or past scores on this page. `robots: noindex, nofollow`. `Referrer-Policy: no-referrer`.
 
@@ -350,7 +350,9 @@ Plus `Event`, `RateLimit`, `DeliveryLog` and `Setting`, as in Tango. The seed cr
 ---
 
 ## 10. Tracking (first-party only, `Event` table)
-`tbt_landing_viewed`, `tbt_started`, `tbt_answered` (index, value, elapsed_ms), `tbt_section_completed`, `tbt_completed`, `tbt_send_viewed`, `tbt_submitted`, `tbt_result_viewed` (with `source=submit|email`), `tbt_retake_clicked`.
+`tbt_landing_viewed`, `tbt_started`, `tbt_answered` (index, value, elapsed_ms), `tbt_section_completed`, `tbt_completed`, `tbt_send_viewed`, `tbt_submitted`, `tbt_result_viewed` (with `source=submit|email`).
+
+*(`tbt_retake_clicked` is gone with the retake link it measured. A retake now arrives as an ordinary `tbt_landing_viewed` from the quarterly email's UTM parameters.)*
 
 ---
 
@@ -438,10 +440,11 @@ Verbatim from *Taboo_Test_Results.docx* unless marked `[COPY TBD]`. Each "(Where
 You just did something courageous and honest. You took The Taboo Test. Take a breath and notice what you're feeling in your body: tension, relief, resistance, surprise, or something you might not have a name for yet.
 *(Removed: "Add up your scores in each section…". The app adds them up.)*
 
-### Terrain line (Where: page + `taboo_terrain_line`): `[COPY TBD]`, three variants
-- One lowest section. Built from: "The section where you scored lowest is your most interesting terrain right now, and where a real shift is possible."
-- Two tied
-- All three tied
+### Terrain line (Where: page + `taboo_terrain_line`), three variants
+`{Section}` is filled with the section name, in Sex → Death → Cash order.
+- One lowest section: "Your lowest score is in {Section}. That's your most interesting terrain right now, and where a real shift is possible."
+- Two tied: "{Section} and {Section} tied for your lowest score. Both are interesting terrain right now. Start with the one you'd rather avoid."
+- All three tied: "All three sections scored the same. Your terrain is whichever one you'd most like to skip. Start there."
 
 ### SEX (Where: page)
 *Your relationship with desire.*
@@ -499,7 +502,7 @@ The question for you now is how to use this freedom well. Money ease, like physi
 - Loop line, the page's call to action, pointing to the email with their practices: **"Check your inbox. I've sent you one thing to do for each section."**
   Rendered above the deliverability note and larger than body text, because it is the only thing the page asks them to do.
 - Then the deliverability note: "If it lands in Promotions or Spam, make sure to drag it to your Inbox."
-- Then `[COPY TBD]`: the "Take it again" link text.
+- Nothing after that. The retake link is removed; retakes come from the quarterly email.
 
 ### EXPAND YOUR LIBERATION (Where: email only, lives in the GHL template, not the app)
 Verbatim from the doc, including the "Upgrade to paid here" link to `https://marieelizabethmali.substack.com/subscribe`. To be refined in the copy session.

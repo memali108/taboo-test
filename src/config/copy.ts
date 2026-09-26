@@ -193,20 +193,21 @@ export const RESULTS = {
   /** The page's call to action: it points at the email, which carries the practices. */
   loopLine: "Check your inbox. I've sent you one thing to do for each section.",
   deliverabilityNote: "If it lands in Promotions or Spam, make sure to drag it to your Inbox.",
-  retakeLink: TBD('"Take it again" link text'),
+  // There is no "Take it again" link: retakes come from the quarterly email (SPEC §4.5).
 } as const;
 
 /**
  * Terrain lines — SPEC §6 and §8.1. One sentence covering every tie case, so the
- * GoHighLevel template needs no logic of its own. All three are `[COPY TBD]`;
- * the `one` variant is to be built from the sentence quoted in Appendix A.
+ * GoHighLevel template needs no logic of its own.
+ *
+ * `{Section}` is filled with the section name by `terrainLine()` in src/lib/terrain.ts,
+ * in Sex → Death → Cash order. They are kept here as plain strings rather than template
+ * functions so `tests/copy.test.ts` can still check them against SPEC.md word for word.
  */
 export const TERRAIN_LINE = {
-  one: TBD(
-    'terrain line, one lowest section. Built from: "The section where you scored lowest is your most interesting terrain right now, and where a real shift is possible."',
-  ),
-  two: TBD("terrain line, two sections tied for lowest"),
-  all: TBD("terrain line, all three sections tied"),
+  one: "Your lowest score is in {Section}. That's your most interesting terrain right now, and where a real shift is possible.",
+  two: "{Section} and {Section} tied for your lowest score. Both are interesting terrain right now. Start with the one you'd rather avoid.",
+  all: "All three sections scored the same. Your terrain is whichever one you'd most like to skip. Start there.",
 } as const;
 
 /** SPEC §8.1 `taboo_change_line` — empty on a first attempt. */

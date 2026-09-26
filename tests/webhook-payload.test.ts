@@ -50,7 +50,7 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
         "taboo_sex_start_here": "Write down the three words you most wish someone would use to describe you sexually. Example: Hot, luscious, creative. Don't edit. Notice what comes up for you when you read them over and decide on the first step you could take to embody the first word. Then take that step.",
         "taboo_tags": "taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed",
         "taboo_terrain": "Sex",
-        "taboo_terrain_line": "[COPY TBD: terrain line, one lowest section. Built from: "The section where you scored lowest is your most interesting terrain right now, and where a real shift is possible."]",
+        "taboo_terrain_line": "Your lowest score is in Sex. That's your most interesting terrain right now, and where a real shift is possible.",
         "taboo_test_version": "v1",
       }
     `);

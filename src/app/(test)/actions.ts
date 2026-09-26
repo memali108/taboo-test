@@ -6,14 +6,19 @@ import { currentAttempt } from "@/lib/attempt";
 /**
  * "Begin" on the landing page (SPEC §4.1).
  *
- * Resumes rather than restarting when this browser already carries an attempt: a second
- * Attempt row for the same person would count as a second start in the funnel and orphan
- * the answers they already gave.
+ * Resumes an UNFINISHED attempt rather than restarting it: a second Attempt row for the
+ * same person would count as a second start in the funnel and orphan the answers they
+ * already gave.
+ *
+ * A SUBMITTED attempt starts a fresh one instead. The attempt cookie lasts 7 days and
+ * retakes now come from the quarterly email (SPEC §4.5), so bouncing them to their old
+ * results would leave anyone who wants to retake inside that window with no way into the
+ * test at all — that escape hatch used to be the "Take it again" link, which is gone.
+ * Their old attempt and its results URL are untouched; every attempt is kept.
  */
 export async function beginAction(form: FormData) {
   const existing = await currentAttempt();
-  if (existing) {
-    if (existing.status === "submitted") redirect(`/r/${existing.publicId}`);
+  if (existing && existing.status !== "submitted") {
     if (existing.status === "completed") redirect("/send");
     redirect("/test");
   }

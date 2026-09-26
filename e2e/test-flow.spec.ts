@@ -212,6 +212,32 @@ test("a submitted attempt redirects away from /test and /send", async ({ page })
   await expect(page).toHaveURL(resultsUrl);
 });
 
+test("the results page shows the terrain line and no retake link", async ({ page }) => {
+  await begin(page);
+  // All 3s -> 15/15/15, so every section ties and the all-equal variant is used.
+  await runAll(page, () => 3);
+  await submitSend(page, testEmail());
+
+  await expect(
+    page.getByText("All three sections scored the same. Your terrain is whichever one you'd most like to skip. Start there."),
+  ).toBeVisible();
+  await expect(page.getByText("Check your inbox.")).toBeVisible();
+  // Retakes come from the quarterly email, so the page offers nothing to click.
+  await expect(page.getByRole("button")).toHaveCount(0);
+  await expect(page.getByText(/take it again/i)).toHaveCount(0);
+});
+
+test("a single lowest section is named in the terrain line", async ({ page }) => {
+  await begin(page);
+  // Sex 10 low, Death 21 high, Cash 15 medium -> terrain Sex.
+  const ratings = "331215442443323".split("").map(Number);
+  await runAll(page, (i) => ratings[i]);
+  await submitSend(page, testEmail());
+  await expect(
+    page.getByText("Your lowest score is in Sex. That's your most interesting terrain right now, and where a real shift is possible."),
+  ).toBeVisible();
+});
+
 test("a retake with the same email gets its own results page", async ({ page }) => {
   const email = testEmail();
 
@@ -220,10 +246,9 @@ test("a retake with the same email gets its own results page", async ({ page }) 
   await submitSend(page, email);
   const first = page.url();
 
-  // "Take it again" clears the cookie and starts a fresh attempt.
-  await page.getByRole("button", { name: /.+/ }).last().click();
-  await expect(page).toHaveURL(/\/$/);
-
+  // No retake link any more: the quarterly email points back at the landing page, and
+  // Begin starts a fresh attempt even though the submitted attempt's cookie is still set.
+  await page.goto("/");
   await page.getByRole("button", { name: "Begin" }).click();
   // Wait for the navigation before runAll's first click: the landing button and the
   // title card's button are both called "Begin", so without this the next click can

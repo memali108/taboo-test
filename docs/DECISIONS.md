@@ -61,6 +61,46 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## Final terrain lines, and the retake link is gone — 2026-09-25
+
+Marie-Elizabeth's copy for all three terrain variants, and a product decision: retakes
+come from her quarterly email, so the results page no longer offers "Take it again".
+
+**`{Section}` placeholders are filled at render**, in Sex → Death → Cash order. The
+templates stay in `copy.ts` as plain strings rather than becoming template functions, so
+`tests/copy.test.ts` can still check them against SPEC.md word for word — a function body
+would slip past that check silently. `terrainLine()` fills them; `tests/terrain.test.ts`
+covers every terrain the scorer can produce and asserts no output ever contains a
+surviving `{`.
+
+**Ordering is enforced, not assumed.** `score()` happens to build `terrain` by filtering
+`SECTIONS`, so it is already in Sex → Death → Cash order — but the two-tied line reads
+wrong if that ever changes, so `terrain.ts` re-orders explicitly and a test passes
+`["cash", "sex"]` to prove it comes back as "Sex and Cash".
+
+### Removing the link forced a flow change
+
+**Begin on `/` now starts a fresh attempt when the current one is already submitted.**
+It used to redirect to the old results page, which was fine *because* the results page
+carried a link that cleared the cookie. Remove that link and the 7-day attempt cookie
+becomes a trap: anyone wanting to retake inside a week would be bounced to their old
+results from every entry point, with nothing to click. The quarterly cadence means this
+would rarely bite — which is exactly why it would have been missed. Their old attempt and
+its results URL are untouched.
+
+SPEC §4.1 and §4.5 are updated to match, since the old §4.5 described the link as the
+mechanism for clearing the cookie.
+
+**`tbt_retake_clicked` is removed** from `tracking.ts`, the `/api/events` whitelist and
+SPEC §10. It measured the link that no longer exists; leaving it in the spec would
+describe an event that can never fire. A retake now arrives as an ordinary
+`tbt_landing_viewed` carrying the quarterly email's UTM parameters. **This is a §10 edit
+Marie-Elizabeth did not ask for** — flagged rather than done quietly.
+
+Still `[COPY TBD]` after this: the landing intro replacement and the "most people score
+lower" line, the whole `/send` step except its heading, the retake change line, and Sex
+statement 5.
+
 ## The results page's loop line has final copy — 2026-09-25
 
 Marie-Elizabeth's words, replacing the placeholder: *"Check your inbox. I've sent you one

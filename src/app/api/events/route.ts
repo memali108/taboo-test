@@ -16,7 +16,6 @@ const EVENT_NAMES = [
   "tbt_send_viewed",
   "tbt_submitted",
   "tbt_result_viewed",
-  "tbt_retake_clicked",
 ] as const;
 
 const Body = z.object({
