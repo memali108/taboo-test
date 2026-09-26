@@ -61,6 +61,55 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## GoHighLevel gets less: four tags, 23 fields — 2026-09-26
+
+Marie-Elizabeth's call. Removed from the payload: the per-section level tags, the terrain
+tags, `taboo_terrain`, `taboo_answers` and the three `taboo_*_lowest_statement` fields.
+What remains is what the emails actually merge in — scores, levels, START HERE, the
+terrain sentence, the change line, the previous scores and the result URL. 23 fields.
+
+**Levels and terrain are fields, not segments.** Tagging them duplicated payload data as
+GoHighLevel state that then had to be kept in step on every retake — two representations
+of one fact, and the tag copy is the one that goes stale. `taboo_terrain` went for the
+same reason: `taboo_terrain_line` is a complete sentence that already names the sections,
+so the bare name had nothing left to do.
+
+**The raw answer string no longer leaves Railway.** That is the change with the widest
+reach: SPEC §12 previously had the privacy page say answers "are stored and sent to
+GoHighLevel", and that is now wrong. §12 is updated to separate the two — stored in
+Postgres, *not* shared with GHL. Whoever writes the policy needs that distinction.
+
+`taboo_*_lowest_statement` went because the Medium Sex and Medium Cash copy asks the
+reader to identify their own lowest-rated statement; being told it was never what the copy
+does.
+
+**Retired tags are stripped, not just stopped.** A contact carrying `taboo-test-sex-high`
+from an earlier submission has it removed on their next one, so our record does not keep
+tags we no longer emit. That only cleans up *our* side — tags already applied inside
+GoHighLevel stay until removed there by hand, which GHL_SETUP.md now says in a callout.
+
+**`PAYLOAD_FIELDS.length` is pinned at 23 in a test.** The field list is what Marie-Elizabeth
+builds custom fields from; drift between the payload and that list is silent, and shows up
+as an empty merge field in someone's email. Adding or trimming a field now has to be a
+deliberate edit in two places.
+
+Two pieces of code survive with no consumer: `Scored.lowestStatementIndex` and the
+Medium-copy behaviour it supported. It stays because SPEC §6 specifies it as an invariant
+and it is tested — removing it would need a §6 edit that was not asked for. Flagged rather
+than deleted.
+
+### GHL_SETUP.md: no tag branching, and a launch rule
+
+The If/Else fallbacks on `_level` and terrain are gone — with four fixed tags there is
+nothing to branch on. The field table is regenerated from `PAYLOAD_FIELDS`.
+
+**"Launching The Provocations"** is new: test takers hear about a launch through Substack,
+so the GHL send goes to contacts *without* `substack-subscriber`, excluding `substack-paid`.
+Written down alongside it is why there is no terrain-based launch email — segmenting a
+launch by how uptight someone scored about sex, death or money would turn a private
+self-assessment into a marketing signal. Also flagged: the exclusion is only as current as
+the last monthly import, so run it immediately before a launch send.
+
 ## The retake change line is final — 2026-09-26
 
 *"Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}."*

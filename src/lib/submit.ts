@@ -3,8 +3,7 @@
  * No database access here so it can be unit-tested; the server action wraps it in a
  * transaction.
  */
-import { SECTIONS, type Section } from "@/config/test";
-import type { Level, Scored } from "./scoring";
+import type { Scored } from "./scoring";
 
 export const TAG_COMPLETED = "taboo-test-completed";
 export const TAG_RETAKEN = "taboo-test-retaken";
@@ -19,15 +18,16 @@ export const TAG_RETAKEN = "taboo-test-retaken";
 export const TAG_SUBSTACK = "substack-subscriber";
 export const TAG_SOURCE = "source-taboo-test";
 
-export const levelTag = (s: Section, l: Level) => `taboo-test-${s}-${l}`;
-export const terrainTag = (s: Section) => `taboo-test-terrain-${s}`;
-
-const LEVELS: Level[] = ["low", "medium", "high"];
-/** Every tag this app manages, so a retake replaces rather than accumulates. */
-const MANAGED = new Set<string>([
-  ...SECTIONS.flatMap((s) => LEVELS.map((l) => levelTag(s, l))),
-  ...SECTIONS.map(terrainTag),
-]);
+/**
+ * Tags this app used to emit, one per section level and one per terrain section. They are
+ * gone: the emails read the `taboo_*_level` and `taboo_terrain_line` fields directly, so
+ * the tags were duplicating payload data as GoHighLevel state that then had to be kept in
+ * step. Any that survive on a contact are stripped on their next submission.
+ *
+ * Note this only cleans up OUR record. Tags already applied inside GoHighLevel stay there
+ * until removed in GHL — see docs/GHL_SETUP.md.
+ */
+const RETIRED_TAG = /^taboo-test-(sex|death|cash)-(low|medium|high)$|^taboo-test-terrain-(sex|death|cash)$/;
 
 export type ContactSnapshot = { attemptCount: number; tags: string[] } | null;
 
@@ -42,15 +42,9 @@ export function computeSubmission(existing: ContactSnapshot, scored: Scored): Su
   const isRetake = (existing?.attemptCount ?? 0) > 0;
   const attemptNumber = (existing?.attemptCount ?? 0) + 1;
 
-  // Drop the level and terrain tags from any previous attempt before adding this one's,
-  // so a contact never carries two levels for the same section. Tags this app does not
-  // manage — anything added by hand in GoHighLevel — are left alone.
-  const tags = (existing?.tags ?? []).filter((t) => !MANAGED.has(t));
-
-  for (const s of SECTIONS) tags.push(levelTag(s, scored.sections[s].level));
-  // One tag per terrain section, so a two-way tie yields two and an all-equal result
-  // yields none — matching `Attempt.terrain`, which is empty in that case (SPEC §6).
-  for (const s of scored.terrain) tags.push(terrainTag(s));
+  // Strip any retired level/terrain tags. Tags this app does not manage — anything added
+  // by hand in GoHighLevel — are left alone.
+  const tags = (existing?.tags ?? []).filter((t) => !RETIRED_TAG.test(t));
 
   for (const t of [TAG_COMPLETED, TAG_SUBSTACK, TAG_SOURCE]) {
     if (!tags.includes(t)) tags.push(t);

@@ -8,11 +8,6 @@ import { SECTIONS, type Section } from "@/config/test";
  */
 const ordered = (terrain: Section[]): Section[] => SECTIONS.filter((s) => terrain.includes(s));
 
-/** "Cash", "Sex & Cash", or "" when all three tie (SPEC §8.1 `taboo_terrain`). */
-export function terrainName(terrain: Section[]): string {
-  return ordered(terrain).map((s) => SECTION_COPY[s].name).join(" & ");
-}
-
 /** Fill each `{Section}` placeholder, left to right, from `names`. */
 function fill(template: string, names: string[]): string {
   let i = 0;

@@ -27,15 +27,12 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
         "first_name": "Jane",
         "source": "taboo-test",
         "submitted_at": "2026-06-03T10:30:00.000Z",
-        "taboo_answers": "331215442443323",
         "taboo_attempt_number": 1,
         "taboo_cash_level": "Medium",
-        "taboo_cash_lowest_statement": "I'm totally on top of my finances, accounting, and even taxes.",
         "taboo_cash_score": 15,
         "taboo_cash_start_here": "Write about the last 3 purchases you made. What motivated you? How do you feel about them in your head and your body? The answer might be something like, Tylenol, pickles, and a thrifted top, and even so, there's good information there for you to unpack.",
         "taboo_change_line": "",
         "taboo_death_level": "High",
-        "taboo_death_lowest_statement": "Knowing I will die one day inspires me to live full-out in each moment.",
         "taboo_death_score": 21,
         "taboo_death_start_here": "Journal about where you could bring your life into greater alignment with how you define a well-lived and well-rounded life. For example, who you want to spend time with, what you spend your money on, how much you allow yourself to rest, how much time you spend outdoors, and how much you create.",
         "taboo_prev_cash_score": "",
@@ -44,11 +41,9 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
         "taboo_prev_taken_at": "",
         "taboo_result_url": "http://localhost:3000/r/abcdefghijkmnopqrstuvwxy?utm_source=email&utm_medium=results",
         "taboo_sex_level": "Low",
-        "taboo_sex_lowest_statement": "I'm fully comfortable expressing my sexual desires.",
         "taboo_sex_score": 10,
         "taboo_sex_start_here": "Write down the three words you most wish someone would use to describe you sexually. Example: Hot, luscious, creative. Don't edit. Notice what comes up for you when you read them over and decide on the first step you could take to embody the first word. Then take that step.",
-        "taboo_tags": "taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed, substack-subscriber, source-taboo-test",
-        "taboo_terrain": "Sex",
+        "taboo_tags": "taboo-test-completed, substack-subscriber, source-taboo-test",
         "taboo_terrain_line": "Your lowest score is in Sex. That's your most interesting terrain right now, and where a real shift is possible.",
         "taboo_test_version": "v1",
       }
@@ -69,13 +64,19 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
     expect(flatten("one\n\ntwo   three\t four ")).toBe("one two three four");
   });
 
-  it("names the lowest-rated statement in each section", () => {
+  it("sends no raw answers, no bare terrain name and no lowest-statement text", () => {
     const p = buildPayload({ ...base, scored, tags });
-    // Sex ratings 3,3,1,2,1; statement 2 is reversed so items are 3,3,1,2,1. The first
-    // minimum is item 3, i.e. statement index 2.
-    expect(scored.sections.sex.items).toEqual([3, 3, 1, 2, 1]);
-    expect(scored.sections.sex.lowestStatementIndex).toBe(2);
-    expect(p.taboo_sex_lowest_statement).toBe("I'm fully comfortable expressing my sexual desires.");
+    // Trimmed deliberately: the emails read the level and terrain_line fields instead,
+    // and the raw answer string never leaves Railway.
+    for (const k of [
+      "taboo_answers",
+      "taboo_terrain",
+      "taboo_sex_lowest_statement",
+      "taboo_death_lowest_statement",
+      "taboo_cash_lowest_statement",
+    ]) {
+      expect(Object.keys(p), k).not.toContain(k);
+    }
   });
 
   it("carries the previous scores and a change line on a retake", () => {
@@ -107,11 +108,11 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
     }
   });
 
-  it("joins two tied terrain sections with an ampersand and sends none when all three tie", () => {
+  it("names both tied sections in the terrain LINE, which is all GHL gets now", () => {
     const tie = score("212121331441515"); // Sex & Cash
-    expect(buildPayload({ ...base, scored: tie, tags: [] }).taboo_terrain).toBe("Sex & Cash");
+    expect(buildPayload({ ...base, scored: tie, tags: [] }).taboo_terrain_line).toContain("Sex and Cash tied");
     const equal = score("333333333333333");
-    expect(buildPayload({ ...base, scored: equal, tags: [] }).taboo_terrain).toBe("");
+    expect(buildPayload({ ...base, scored: equal, tags: [] }).taboo_terrain_line).toContain("All three sections");
   });
 
   it("sends the START HERE paragraph for the level actually reached", () => {
@@ -123,7 +124,10 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
 
   it("exposes the field list for the admin Settings page", () => {
     expect(PAYLOAD_FIELDS).toContain("taboo_terrain_line");
-    expect(PAYLOAD_FIELDS.length).toBeGreaterThan(25);
+    expect(PAYLOAD_FIELDS).toContain("taboo_change_line");
+    // Pinned exactly, so trimming or adding a field is a deliberate edit here and in
+    // docs/GHL_SETUP.md, never a silent drift from the custom fields set up in GHL.
+    expect(PAYLOAD_FIELDS).toHaveLength(23);
   });
 });
 

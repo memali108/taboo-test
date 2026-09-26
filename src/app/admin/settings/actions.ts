@@ -45,7 +45,6 @@ export async function sendTestPayload(): Promise<SettingsState> {
     firstName: "Test",
     email: "test@example.com",
     publicId: "test".padEnd(24, "x"),
-    answers: "331215442443323",
     testVersion: "v1",
     scored,
     submittedAt: new Date(),

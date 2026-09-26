@@ -157,7 +157,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
         firstName,
         email,
         publicId: attempt.publicId,
-        answers: attempt.answers,
         testVersion: attempt.testVersion,
         scored,
         submittedAt: now,

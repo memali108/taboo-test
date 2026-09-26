@@ -264,18 +264,19 @@ The prefix is `taboo_`, deliberately different from Tango's `tt_` so the GHL cus
 | `taboo_sex_score` / `taboo_death_score` / `taboo_cash_score` | `14` | 5–25 |
 | `taboo_sex_level` / `…_death_level` / `…_cash_level` | `"Medium"` | |
 | `taboo_sex_start_here` / `…death…` / `…cash…` | text | that level's START HERE paragraph (Appendix A) |
-| `taboo_sex_lowest_statement` / `…death…` / `…cash…` | text | the statement text |
-| `taboo_terrain` | `"Cash"` or `"Sex & Cash"` | empty when all three tie |
-| `taboo_terrain_line` | text | full sentence from copy, handles every tie case, so GHL needs no logic |
+| `taboo_terrain_line` | text | full sentence from copy, naming the section(s) and handling every tie case, so GHL needs no logic |
 | `taboo_result_url` | absolute URL | `/r/{id}?utm_source=email&utm_medium=results` |
 | `taboo_attempt_number` | `2` | per email |
 | `taboo_prev_taken_at` | ISO or empty | |
 | `taboo_prev_sex_score` / `…death…` / `…cash…` | `12` or empty | |
 | `taboo_change_line` | text or empty | pre-written sentence: "Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}." — e.g. "Your results from your last test on June 3 were: Sex 12, Death 15, Cash 9." Empty on a first attempt, so the email shows nothing. |
-| `taboo_answers` | `"431254322153414"` | raw |
-| `taboo_tags` | comma-separated | `taboo-test-sex-medium, taboo-test-death-high, taboo-test-cash-low, taboo-test-terrain-cash, taboo-test-completed, substack-subscriber, source-taboo-test` (+ `taboo-test-retaken` on retakes) |
+| `taboo_tags` | comma-separated | `taboo-test-completed, substack-subscriber, source-taboo-test` (+ `taboo-test-retaken` on retakes) |
+
+**Four tags, and no more.** There are no per-section level tags and no terrain tags: the emails read `taboo_*_level` and `taboo_terrain_line` directly, so tagging the same thing would duplicate payload data as GoHighLevel state that then has to be kept in step. Levels and terrain are fields, not segments.
 
 `substack-subscriber` and `source-taboo-test` are applied to everyone who submits. `substack-subscriber` is load-bearing: a GoHighLevel workflow removes the contact from the Taboo Tango nurture sequence when it appears, so a subscriber is not courted as a new lead. The monthly Substack CSV import applies the same tag (§8.3).
+
+**The raw answer string never leaves Railway.** GoHighLevel receives scores, levels and the copy the email needs — not the 15 ratings themselves.
 
 **Rule:** every copy field sent to GHL must be a **single paragraph of plain text** (no HTML, no line breaks), so it renders cleanly as a GHL merge field. The START HERE blocks already are.
 
@@ -292,12 +293,13 @@ Claude Code: generate this as `docs/GHL_SETUP.md` with the full field list.
 1. Create custom fields for each `taboo_*` field. Use Multi-line text for the `_start_here`, `_statement`, and `_line` fields.
 2. Workflow **"Taboo Test – Results"**, trigger = Inbound Webhook. Paste the URL into the app's Admin → Settings and click "Send test payload" so GHL can map the fields.
 3. Action: Create/Update Contact (match by email), mapping all fields.
-4. Tags: try adding tags from `taboo_tags`. If GHL won't take dynamic tags, use three If/Else blocks on the `_level` fields (3 branches each) plus a terrain If/Else.
+4. Tags: add tags from `taboo_tags` — four of them, all fixed strings, so no branching is needed.
 5. Action: Send Email, using the "Taboo Test Results" template (§8.4).
 6. **"Substack subscriber – leave Tango nurture"**: trigger on the `substack-subscriber` tag being added, remove the contact from the Taboo Tango nurture sequence. Someone taking this test came from the Substack list and is not a cold lead.
 7. **"Taboo Test – Quarterly retake"**: wait 90 days after the `taboo-test-completed` tag is added, then send the retake email with the test link, using the stored `taboo_*_score` fields as their "last time" scores. Skip this if you'll send retakes from Substack instead.
 8. **Monthly Substack CSV import**, matching on email: tag `substack-subscriber`, and tag paying subscribers `substack-paid`. An If/Else on `substack-paid` in the results workflow skips the EXPAND YOUR LIBERATION upgrade block for people who already pay.
-9. **Before launch:** take the test yourself on the live site and check the email end to end, including on a phone.
+9. **Launching The Provocations:** test takers hear about it through Substack, so the GoHighLevel send goes only to contacts *without* `substack-subscriber`, excluding anyone tagged `substack-paid`. There is no per-section or per-terrain launch email — a private self-assessment is not a marketing segment.
+10. **Before launch:** take the test yourself on the live site and check the email end to end, including on a phone.
 
 ### 8.4 Results email structure (all wording `[COPY TBD]`, refined with Marie-Elizabeth)
 Subject → greeting with `{{first_name}}` → one-line opener → three score lines (`Sex {{taboo_sex_score}}/25 · {{taboo_sex_level}}` …) → `{{taboo_change_line}}` → `{{taboo_terrain_line}}` → **START HERE** × 3 (section name + `{{…_start_here}}`) → "See your full results" button (`{{taboo_result_url}}`) → EXPAND YOUR LIBERATION block with the Substack upgrade link (static) → retake note ("I'll send you The Taboo Test again next quarter") → sign-off.
@@ -376,7 +378,7 @@ Plus `Event`, `RateLimit`, `DeliveryLog` and `Setting`, as in Tango. The seed cr
 
 ## 12. Privacy and legal (flags for Marie-Elizabeth, not legal advice)
 - Answers about someone's sex life are "special category" data under the GDPR (EU/UK). With EU/UK subscribers, that category may need explicit consent to process. **Check with whoever advises on your privacy policy** whether the `/send` step needs a required plain-language consent line (e.g. "I agree to Marie-Elizabeth storing my answers to send my results"). Claude Code: build the checkbox behind a config flag (`REQUIRE_DATA_CONSENT`), off by default, so it can be switched on without a rebuild.
-- The privacy page must say plainly: answers and scores are stored (Railway) and sent to GoHighLevel to deliver the email. They're kept until the person asks for deletion. There are no third-party cookies.
+- The privacy page must say plainly what is stored and what is shared, and the two are no longer the same thing. **Answers and scores are stored** in Postgres on Railway. **GoHighLevel receives scores, levels and the copy for the email — not the raw answers.** Both are kept until the person asks for deletion. There are no third-party cookies.
 - Admin gets a "Delete contact and attempts" action for deletion requests.
 
 ---

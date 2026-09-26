@@ -10,8 +10,8 @@
  * than trusting the copy to stay that way, and a test pins it.
  */
 import { CHANGE_LINE, SECTION_COPY } from "@/config/copy";
-import { SECTIONS, STATEMENTS, type Section } from "@/config/test";
-import { terrainLine, terrainName } from "./terrain";
+import { SECTIONS, type Section } from "@/config/test";
+import { terrainLine } from "./terrain";
 import type { Scored } from "./scoring";
 import type { PreviousSubmission } from "./history";
 import { emailResultUrl } from "./site";
@@ -25,7 +25,6 @@ export type PayloadInput = {
   firstName: string;
   email: string;
   publicId: string;
-  answers: string;
   testVersion: string;
   scored: Scored;
   submittedAt: Date;
@@ -77,12 +76,12 @@ export function buildPayload(i: PayloadInput): WebhookPayload {
     out[`taboo_${s}_score`] = r.total;
     out[`taboo_${s}_level`] = titleCase(r.level);
     out[`taboo_${s}_start_here`] = flatten(SECTION_COPY[s].levels[r.level].startHere);
-    // The statement they rated lowest in this section — the Medium Sex and Medium Cash
-    // copy tells them to go and look at it, so the email has to name it.
-    out[`taboo_${s}_lowest_statement`] = flatten(STATEMENTS[r.lowestStatementIndex].text);
   }
 
-  out.taboo_terrain = terrainName(i.scored.terrain as Section[]);
+  // No `taboo_terrain`: `taboo_terrain_line` is a complete sentence naming the sections,
+  // so the bare name had nothing left to do. No `taboo_*_lowest_statement` either — the
+  // Medium copy asks the reader to identify their own lowest-rated statement rather than
+  // being told it. And no `taboo_answers`: the raw answer string stays in Railway.
   out.taboo_terrain_line = flatten(terrainLine(i.scored.terrain as Section[]));
   out.taboo_result_url = emailResultUrl(i.publicId);
   out.taboo_attempt_number = i.attemptNumber;
@@ -95,7 +94,6 @@ export function buildPayload(i: PayloadInput): WebhookPayload {
   out.taboo_prev_cash_score = i.previous ? i.previous.cashScore : "";
   out.taboo_change_line = flatten(changeLine(i.previous, i.submittedAt));
 
-  out.taboo_answers = i.answers;
   out.taboo_tags = i.tags.join(", ");
   return out;
 }
@@ -106,7 +104,6 @@ export const PAYLOAD_FIELDS = Object.keys(
     firstName: "Jane",
     email: "jane@example.com",
     publicId: "a".repeat(24),
-    answers: "3".repeat(15),
     testVersion: "v1",
     scored: {
       testVersion: "v1",

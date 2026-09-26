@@ -30,7 +30,6 @@ export async function resendWebhook(formData: FormData) {
       firstName: attempt.contact.firstName,
       email: attempt.contact.email,
       publicId: attempt.publicId,
-      answers: attempt.answers,
       testVersion: attempt.testVersion,
       scored,
       submittedAt: attempt.submittedAt ?? new Date(),

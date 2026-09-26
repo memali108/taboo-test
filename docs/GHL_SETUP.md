@@ -24,22 +24,17 @@ and paragraphs.
 | `first_name` | Single line text |
 | `email` | Single line text |
 | `submitted_at` | Single line text |
-| `marketing_consent` | Single line text |
 | `source` | Single line text |
 | `taboo_test_version` | Single line text |
 | `taboo_sex_score` | Single line text |
 | `taboo_sex_level` | Single line text |
 | `taboo_sex_start_here` | Multi-line text |
-| `taboo_sex_lowest_statement` | Multi-line text |
 | `taboo_death_score` | Single line text |
 | `taboo_death_level` | Single line text |
 | `taboo_death_start_here` | Multi-line text |
-| `taboo_death_lowest_statement` | Multi-line text |
 | `taboo_cash_score` | Single line text |
 | `taboo_cash_level` | Single line text |
 | `taboo_cash_start_here` | Multi-line text |
-| `taboo_cash_lowest_statement` | Multi-line text |
-| `taboo_terrain` | Single line text |
 | `taboo_terrain_line` | Multi-line text |
 | `taboo_result_url` | Single line text |
 | `taboo_attempt_number` | Single line text |
@@ -48,7 +43,6 @@ and paragraphs.
 | `taboo_prev_death_score` | Single line text |
 | `taboo_prev_cash_score` | Single line text |
 | `taboo_change_line` | Multi-line text |
-| `taboo_answers` | Single line text |
 | `taboo_tags` | Single line text |
 
 Every copy field arrives as a **single paragraph of plain text**: no HTML, no line
@@ -71,16 +65,25 @@ table above.
 
 ## 4. Tags
 
-Try adding tags from `taboo_tags` directly — it arrives comma-separated, e.g.
-`taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed, substack-subscriber, source-taboo-test`.
+`taboo_tags` arrives comma-separated and holds **four fixed strings**:
 
-Two of those do work beyond labelling: `substack-subscriber` triggers the workflow in §6,
-and `taboo-test-completed` triggers the quarterly retake in §7.
+`taboo-test-completed, substack-subscriber, source-taboo-test` — plus `taboo-test-retaken`
+when it is not their first time.
 
-If GHL will not take dynamic tags, use **three If/Else blocks** on the `_level` fields
-(three branches each) plus one on `taboo_terrain`.
+They are all fixed, so no If/Else branching is needed: map `taboo_tags` straight into an
+**Add Tag** action.
 
-A retake also carries `taboo-test-retaken`.
+**There are no level or terrain tags.** Scores, levels and the terrain sentence travel as
+*fields* — `taboo_sex_level`, `taboo_terrain_line` and the rest — which the email merges
+in directly. Tagging the same information would duplicate it as GHL state that then has to
+be kept in step on every retake.
+
+Two of these tags do work beyond labelling: `substack-subscriber` triggers the workflow in
+§6, and `taboo-test-completed` triggers the quarterly retake in §7.
+
+> **If you set this up earlier with level or terrain tags**, remove them in GoHighLevel by
+> hand. The app stops sending them and clears them from its own record, but it cannot
+> delete a tag that already exists on a GHL contact.
 
 ## 5. Send the results email
 
@@ -172,7 +175,29 @@ template. The only difference between them is that block.
 is still untagged and will be asked to upgrade again. Monthly is usually fine; run the
 import before a send if you have just announced a paid tier.
 
-## 9. Before launch
+## 9. Launching The Provocations
+
+**Test takers hear about a launch through Substack, not through GoHighLevel.** They are
+already on the list; announcing to them from GHL as well means the same person gets the
+same news twice from two systems.
+
+So the GHL launch send goes to **contacts who are not on the Substack list**:
+
+1. Build a segment: contacts **without** the tag `substack-subscriber`.
+2. Exclude anyone tagged `substack-paid` — they already have the paid tier, so a general
+   invitation is the wrong message.
+3. Send the general invitation to what remains.
+
+That is the whole rule. There is no per-section or per-terrain launch email: the app no
+longer sends level or terrain tags (§4), and segmenting a launch by how uptight someone
+scored about sex, death or money would use a private self-assessment as a marketing
+signal. The scores exist to be told back to the person who gave them.
+
+**The exclusion depends on the monthly import being current** (§8). Someone who subscribed
+or upgraded since the last import is still untagged in GHL and will receive the general
+invitation. Run the import immediately before a launch send.
+
+## 10. Before launch
 
 - Take the test yourself on the live site and check the email end to end, **including on a
   phone**.

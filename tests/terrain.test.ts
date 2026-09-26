@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { terrainLine, terrainName } from "@/lib/terrain";
+import { terrainLine } from "@/lib/terrain";
 import { score } from "@/lib/scoring";
 import { SECTIONS, type Section } from "@/config/test";
 
@@ -8,19 +8,6 @@ const ALL_TERRAINS: Section[][] = [
   ["sex"], ["death"], ["cash"],
   ["sex", "death"], ["sex", "cash"], ["death", "cash"],
 ];
-
-describe("terrainName", () => {
-  it("names one section, joins two with an ampersand, and is empty for none", () => {
-    expect(terrainName(["cash"])).toBe("Cash");
-    expect(terrainName(["sex", "cash"])).toBe("Sex & Cash");
-    expect(terrainName([])).toBe("");
-  });
-
-  it("always orders Sex → Death → Cash, whatever order it is given", () => {
-    expect(terrainName(["cash", "sex"])).toBe("Sex & Cash");
-    expect(terrainName(["cash", "death"])).toBe("Death & Cash");
-  });
-});
 
 describe("terrainLine", () => {
   it("fills the section name for a single lowest section", () => {
