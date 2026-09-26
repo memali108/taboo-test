@@ -60,7 +60,7 @@ export const PRIVACY_SECTIONS: Section[] = [
       { lead: "If you open my emails.", p: " Whether you opened them and which links you clicked." },
       {
         lead: "Whether you're a Substack subscriber.",
-        p: " Once a month I note in my email platform which people are subscribers or paid subscribers to The Taboo Trilogy on Substack, using Substack's subscriber export. This keeps me from, for example, inviting you to upgrade when you already have.",
+        p: " Once a month I note in my email platform which people are subscribers or paid subscribers to The Taboo Trilogy on Substack, using Substack's subscriber export. This makes sure the quarterly retake only goes to current subscribers.",
       },
     ],
   },

@@ -20,7 +20,7 @@ Email: hello@marieelizabethmali.com
 
 **If you open my emails.** Whether you opened them and which links you clicked.
 
-**Whether you're a Substack subscriber.** Once a month I note in my email platform which people are subscribers or paid subscribers to The Taboo Trilogy on Substack, using Substack's subscriber export. This keeps me from, for example, inviting you to upgrade when you already have.
+**Whether you're a Substack subscriber.** Once a month I note in my email platform which people are subscribers or paid subscribers to The Taboo Trilogy on Substack, using Substack's subscriber export. This makes sure the quarterly retake only goes to current subscribers.
 
 ### Please know what your answers are
 Your answers are about your sex life, your feelings about death, and your relationship with money. Some privacy laws treat information about someone's sex life as especially sensitive. I treat all of your answers that way: they're stored only where this policy says, used only for the purposes below, and never shared for anyone else's use.
