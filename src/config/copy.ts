@@ -190,7 +190,8 @@ export const RESULTS = {
   terrainLabel: "Your most interesting terrain",
   levelLabels: { low: "Low", medium: "Medium", high: "High" },
   zoneLabels: { low: "Low", medium: "Medium", high: "High" },
-  loopLine: TBD("loop line pointing to the email with their practices"),
+  /** The page's call to action: it points at the email, which carries the practices. */
+  loopLine: "Check your inbox. I've sent you one thing to do for each section.",
   deliverabilityNote: "If it lands in Promotions or Spam, make sure to drag it to your Inbox.",
   retakeLink: TBD('"Take it again" link text'),
 } as const;

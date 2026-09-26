@@ -61,6 +61,24 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## The results page's loop line has final copy — 2026-09-25
+
+Marie-Elizabeth's words, replacing the placeholder: *"Check your inbox. I've sent you one
+thing to do for each section."* `copy.ts` and SPEC.md Appendix A both updated, so
+`tests/copy.test.ts` keeps checking the running page against the spec word for word.
+
+**It is now the heaviest thing in the closing block** — 22px semibold, rising to 24px from
+`sm`, against 16px for the deliverability note beneath it. It is the only thing the page
+asks anyone to do, and the page deliberately has no button: the action is in their inbox,
+so there is nothing here to click. Typographic weight is the whole mechanism.
+
+The deliverability note moved from a 4-unit gap to 3 and stays at body size, so it reads
+as a footnote to the loop line rather than a peer. That is the opposite of the problem
+recorded in taboo-quiz's DECISIONS, where the note ended up at equal weight to the hook it
+followed and the page's last words became an imperative about spam folders.
+
+Still `[COPY TBD]` on this page: the terrain lines and the "Take it again" link text.
+
 ## Results page: an all-sea meter ramp and sea-soft section blocks — 2026-09-25
 
 Marie-Elizabeth's design pass. The meter's zones become the three website sea tints —

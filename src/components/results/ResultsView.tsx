@@ -102,10 +102,15 @@ export function ResultsView({ scored }: { scored: Scored }) {
 
       {/* Closing */}
       <div className="mt-14 border-t border-line pt-8">
-        <p className="max-w-prose text-lg leading-relaxed text-ink">
+        {/*
+          The loop line is the only thing this page asks anyone to do, so it carries the
+          most weight in the closing block: larger and heavier than the body copy, and
+          above the deliverability note, which is a footnote to it rather than a peer.
+        */}
+        <p className="max-w-prose text-[1.375rem] font-semibold leading-snug text-ink sm:text-2xl">
           <Copy text={RESULTS.loopLine} />
         </p>
-        <p className="mt-4 max-w-prose text-base leading-relaxed text-ink">{RESULTS.deliverabilityNote}</p>
+        <p className="mt-3 max-w-prose text-base leading-relaxed text-ink">{RESULTS.deliverabilityNote}</p>
         <div className="mt-10">
           <RetakeLink label={RESULTS.retakeLink} action={retakeAction} />
         </div>

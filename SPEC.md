@@ -495,8 +495,11 @@ You've built a genuinely healthy relationship with money. You're confident, clea
 The question for you now is how to use this freedom well. Money ease, like physical health, is most interesting when it becomes a foundation for something greater rather than an end in itself.
 **START HERE** (Where: email): Pick someone in your life who could benefit from your confident relationship with money. This is not about giving advice; it's about modeling presence and ease around money conversations. Here's a great way to kick-start a money conversation: Ask them: If you never needed to earn another dime and had more money than you could ever spend, what would you do differently with your life?
 
-### Results page closing (Where: page): `[COPY TBD]`
-Loop line pointing to the email with their practices, then the deliverability note ("If it lands in Promotions or Spam, make sure to drag it to your Inbox."), then "Take it again" link text.
+### Results page closing (Where: page)
+- Loop line, the page's call to action, pointing to the email with their practices: **"Check your inbox. I've sent you one thing to do for each section."**
+  Rendered above the deliverability note and larger than body text, because it is the only thing the page asks them to do.
+- Then the deliverability note: "If it lands in Promotions or Spam, make sure to drag it to your Inbox."
+- Then `[COPY TBD]`: the "Take it again" link text.
 
 ### EXPAND YOUR LIBERATION (Where: email only, lives in the GHL template, not the app)
 Verbatim from the doc, including the "Upgrade to paid here" link to `https://marieelizabethmali.substack.com/subscribe`. To be refined in the copy session.
