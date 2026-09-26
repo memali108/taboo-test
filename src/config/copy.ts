@@ -12,9 +12,6 @@
 
 export const TBD = (note: string) => `[COPY TBD: ${note}]`;
 
-/** Rendered as-is wherever copy is still to be written. */
-export const COPY_TBD = "[COPY TBD]";
-
 // ─── Landing (/) ────────────────────────────────────────────────────────────
 
 export const LANDING = {
@@ -212,7 +209,12 @@ export const TERRAIN_LINE = {
   all: "All three sections scored the same. Your terrain is whichever one you'd most like to skip. Start there.",
 } as const;
 
-/** SPEC §8.1 `taboo_change_line` — empty on a first attempt. */
-export const CHANGE_LINE_TBD = TBD(
-  'change line for retakes, e.g. "Since your last test on June 3: Sex 12 → 17, Death 15 → 15, Cash 9 → 13."',
-);
+/**
+ * SPEC §8.1 `taboo_change_line`. Email only — past scores never appear on the results
+ * page, because anyone can type any address into /send (SPEC §2).
+ *
+ * `{Month D}` takes the previous test's date and the three `{n}` take Sex, Death and Cash
+ * in that order; `changeLine()` in src/lib/webhook-payload.ts fills them. Empty string on
+ * a first attempt, so the email simply shows nothing there.
+ */
+export const CHANGE_LINE = "Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}.";

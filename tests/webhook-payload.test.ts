@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPayload, flatten, PAYLOAD_FIELDS } from "@/lib/webhook-payload";
+import { buildPayload, changeLine, flatten, formatPreviousDate, PAYLOAD_FIELDS } from "@/lib/webhook-payload";
 import { score } from "@/lib/scoring";
 import { computeSubmission } from "@/lib/submit";
 import { SECTION_COPY } from "@/config/copy";
@@ -94,7 +94,9 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
     expect(p.taboo_attempt_number).toBe(2);
     expect(p.taboo_prev_taken_at).toBe("2026-03-01T09:00:00.000Z");
     expect(p.taboo_prev_sex_score).toBe(12);
-    expect(p.taboo_change_line).not.toBe("");
+    expect(p.taboo_change_line).toBe(
+      "Your results from your last test on March 1 were: Sex 12, Death 15, Cash 9.",
+    );
   });
 
   it("sends empty strings, not missing keys, on a first attempt", () => {
@@ -122,5 +124,52 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
   it("exposes the field list for the admin Settings page", () => {
     expect(PAYLOAD_FIELDS).toContain("taboo_terrain_line");
     expect(PAYLOAD_FIELDS.length).toBeGreaterThan(25);
+  });
+});
+
+describe("the retake change line", () => {
+  const prev = (iso: string) => ({
+    submittedAt: new Date(iso),
+    sexScore: 12,
+    deathScore: 15,
+    cashScore: 9,
+  });
+  const now = new Date("2026-09-26T12:00:00.000Z");
+
+  it("is empty on a first attempt, so the email shows nothing", () => {
+    expect(changeLine(null, now)).toBe("");
+  });
+
+  it("fills the date and the three scores in Sex, Death, Cash order", () => {
+    expect(changeLine(prev("2026-06-03T10:00:00.000Z"), now)).toBe(
+      "Your results from your last test on June 3 were: Sex 12, Death 15, Cash 9.",
+    );
+  });
+
+  it("omits the year within the same year and includes it across years", () => {
+    expect(formatPreviousDate(new Date("2026-06-03T10:00:00Z"), now)).toBe("June 3");
+    expect(formatPreviousDate(new Date("2025-12-31T10:00:00Z"), now)).toBe("December 31, 2025");
+    // A year apart to the day still counts as a different year.
+    expect(formatPreviousDate(new Date("2025-09-26T12:00:00Z"), now)).toBe("September 26, 2025");
+  });
+
+  it("writes single-digit days without a leading zero", () => {
+    expect(formatPreviousDate(new Date("2026-01-05T00:00:00Z"), now)).toBe("January 5");
+  });
+
+  it("leaves no placeholder behind, whatever the scores", () => {
+    for (const [sex, death, cash] of [[5, 5, 5], [25, 25, 25], [5, 25, 15]]) {
+      const line = changeLine(
+        { submittedAt: new Date("2026-02-14T00:00:00Z"), sexScore: sex, deathScore: death, cashScore: cash },
+        now,
+      );
+      expect(line).not.toContain("{");
+      expect(line).toContain(`Sex ${sex}, Death ${death}, Cash ${cash}.`);
+    }
+  });
+
+  it("formats in UTC, matching the submitted_at it sits beside", () => {
+    // 23:30 UTC is the same calendar day in the payload and in the sentence.
+    expect(formatPreviousDate(new Date("2026-06-03T23:30:00Z"), now)).toBe("June 3");
   });
 });

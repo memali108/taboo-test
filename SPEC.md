@@ -271,7 +271,7 @@ The prefix is `taboo_`, deliberately different from Tango's `tt_` so the GHL cus
 | `taboo_attempt_number` | `2` | per email |
 | `taboo_prev_taken_at` | ISO or empty | |
 | `taboo_prev_sex_score` / `…death…` / `…cash…` | `12` or empty | |
-| `taboo_change_line` | text or empty | pre-written sentence, e.g. "Since your last test on June 3: Sex 12 → 17, Death 15 → 15, Cash 9 → 13." (wording `[COPY TBD]`). Empty on a first attempt, so the email shows nothing. |
+| `taboo_change_line` | text or empty | pre-written sentence: "Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}." — e.g. "Your results from your last test on June 3 were: Sex 12, Death 15, Cash 9." Empty on a first attempt, so the email shows nothing. |
 | `taboo_answers` | `"431254322153414"` | raw |
 | `taboo_tags` | comma-separated | `taboo-test-sex-medium, taboo-test-death-high, taboo-test-cash-low, taboo-test-terrain-cash, taboo-test-completed, substack-subscriber, source-taboo-test` (+ `taboo-test-retaken` on retakes) |
 
@@ -516,6 +516,13 @@ The question for you now is how to use this freedom well. Money ease, like physi
   Rendered above the deliverability note and larger than body text, because it is the only thing the page asks them to do.
 - Then the deliverability note: "If it lands in Promotions or Spam, make sure to drag it to your Inbox."
 - Nothing after that. The retake link is removed; retakes come from the quarterly email.
+
+### Change line (Where: email only, `taboo_change_line`)
+"Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}."
+
+`{Month D}` is the date of their previous test; the three `{n}` are Sex, Death and Cash in that order. The date reads "June 3", gaining a year — "December 31, 2025" — only when the previous test fell in a different year from this one. **Empty string on a first attempt**, so the email shows nothing rather than an empty sentence.
+
+*(These are last time's scores only. This line sits next to the current ones already in the email, so it does not repeat them.)*
 
 ### EXPAND YOUR LIBERATION (Where: email only, lives in the GHL template, not the app)
 Verbatim from the doc, including the "Upgrade to paid here" link to `https://marieelizabethmali.substack.com/subscribe`. To be refined in the copy session.

@@ -9,7 +9,7 @@
  * breaks — so it renders cleanly as a GHL merge field. `flatten()` enforces that rather
  * than trusting the copy to stay that way, and a test pins it.
  */
-import { CHANGE_LINE_TBD, SECTION_COPY } from "@/config/copy";
+import { CHANGE_LINE, SECTION_COPY } from "@/config/copy";
 import { SECTIONS, STATEMENTS, type Section } from "@/config/test";
 import { terrainLine, terrainName } from "./terrain";
 import type { Scored } from "./scoring";
@@ -35,6 +35,30 @@ export type PayloadInput = {
 };
 
 export type WebhookPayload = Record<string, string | number | boolean>;
+
+/**
+ * "June 3", or "June 3, 2025" when the previous test fell in a different year from this
+ * one. Formatted in UTC, the same clock `submitted_at` is stored against, so the date in
+ * the sentence always matches the date in the payload beside it. We do not know the
+ * respondent's timezone, so a late-evening submission in a western zone can read as the
+ * following day — the alternative is a date that disagrees with our own record of it.
+ */
+export function formatPreviousDate(previous: Date, relativeTo: Date): string {
+  const base = { month: "long", day: "numeric", timeZone: "UTC" } as const;
+  const sameYear = previous.getUTCFullYear() === relativeTo.getUTCFullYear();
+  return new Intl.DateTimeFormat("en-US", sameYear ? base : { ...base, year: "numeric" }).format(previous);
+}
+
+/** The retake sentence, or "" on a first attempt. */
+export function changeLine(previous: PreviousSubmission | null, submittedAt: Date): string {
+  if (!previous) return "";
+  const scores = [previous.sexScore, previous.deathScore, previous.cashScore];
+  let i = 0;
+  return CHANGE_LINE.replace("{Month D}", () => formatPreviousDate(previous.submittedAt, submittedAt)).replace(
+    /\{n\}/g,
+    () => String(scores[i++]),
+  );
+}
 
 export function buildPayload(i: PayloadInput): WebhookPayload {
   const out: WebhookPayload = {
@@ -69,7 +93,7 @@ export function buildPayload(i: PayloadInput): WebhookPayload {
   out.taboo_prev_sex_score = i.previous ? i.previous.sexScore : "";
   out.taboo_prev_death_score = i.previous ? i.previous.deathScore : "";
   out.taboo_prev_cash_score = i.previous ? i.previous.cashScore : "";
-  out.taboo_change_line = i.previous ? flatten(CHANGE_LINE_TBD) : "";
+  out.taboo_change_line = flatten(changeLine(i.previous, i.submittedAt));
 
   out.taboo_answers = i.answers;
   out.taboo_tags = i.tags.join(", ");

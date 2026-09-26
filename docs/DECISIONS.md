@@ -61,6 +61,38 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## The retake change line is final — 2026-09-26
+
+*"Your results from your last test on {Month D} were: Sex {n}, Death {n}, Cash {n}."*
+Email only, as SPEC §2 requires — past scores never appear on the results page, because
+anyone can type any address into `/send`.
+
+Same pattern as the terrain lines: the template stays a plain string in `copy.ts` so
+`tests/copy.test.ts` can check it against SPEC.md word for word, and `changeLine()` in
+`webhook-payload.ts` fills it. A template function would slip past that check.
+
+**It reports last time's scores only, not a delta.** The email already carries the current
+scores above it, so the arrow form sketched in the old §8.1 example
+("Sex 12 → 17") would have repeated them.
+
+**The date is formatted in UTC**, the same clock `submitted_at` is stored against, so the
+date in the sentence always agrees with the date in the payload beside it. We do not know
+the respondent's timezone, so a submission late in the evening in a western zone can read
+as the following day. The alternative — guessing a zone — would produce a sentence that
+contradicts our own record of when they took it, which is worse in a keepsake email.
+
+**The year appears only across a year boundary**: "June 3" within the same year,
+"December 31, 2025" otherwise. Tested at the boundary, including exactly one year apart to
+the day, which is a different year and does take the year.
+
+**One `[COPY TBD]` remains in `copy.ts`: `SEND.dataConsentLabel`.** It is the required
+data-processing consent line, which only renders when `REQUIRE_DATA_CONSENT` is on — and
+that stays off until whoever advises on the privacy policy says whether it is needed
+(SPEC §12). So it is correctly unwritten rather than overlooked. The unused `COPY_TBD`
+constant was removed at the same time; nothing referenced it.
+
+Also still outstanding, outside `copy.ts`: the privacy policy itself, which is a stub.
+
 ## Sex statement 5 is final, replaced in place while still `v1` — 2026-09-26
 
 *"I make my own pleasure a priority, without a trace of guilt."* Scored normally, not
