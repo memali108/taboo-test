@@ -48,7 +48,6 @@ export async function sendTestPayload(): Promise<SettingsState> {
     answers: "331215442443323",
     testVersion: "v1",
     scored,
-    marketingConsent: false,
     submittedAt: new Date(),
     attemptNumber: 1,
     tags: computeSubmission(null, scored).tags,

@@ -79,7 +79,6 @@ async function main() {
       create: {
         email, firstName: `Seed${i}`, isSeed: true,
         attemptCount: plan.attemptNumber, lastSubmittedAt: submittedAt, tags: plan.tags,
-        ...(Math.random() < 0.4 ? { consentAt: submittedAt, consentSource: "taboo-test" } : {}),
       },
       update: { attemptCount: plan.attemptNumber, lastSubmittedAt: submittedAt, tags: plan.tags },
       select: { id: true },

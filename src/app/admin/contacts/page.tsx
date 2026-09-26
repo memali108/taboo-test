@@ -18,7 +18,7 @@ export default async function ContactsPage({
     where: { ...NOT_SEED, ...(q ? { email: { contains: q, mode: "insensitive" as const } } : {}) },
     orderBy: { lastSubmittedAt: "desc" },
     take: PAGE,
-    select: { id: true, email: true, firstName: true, attemptCount: true, lastSubmittedAt: true, consentAt: true },
+    select: { id: true, email: true, firstName: true, attemptCount: true, lastSubmittedAt: true },
   });
 
   return (
@@ -53,7 +53,7 @@ export default async function ContactsPage({
 
       <Card title={`${contacts.length}${contacts.length === PAGE ? "+" : ""} contacts`}>
         <Table
-          head={["Email", "First name", "Attempts", "Last submitted", "Mailing list"]}
+          head={["Email", "First name", "Attempts", "Last submitted"]}
           rows={contacts.map((c) => [
             <Link key="e" href={`/admin/contacts/${c.id}`} className="text-red underline underline-offset-2">
               {c.email}
@@ -61,7 +61,6 @@ export default async function ContactsPage({
             c.firstName,
             c.attemptCount,
             c.lastSubmittedAt ? c.lastSubmittedAt.toISOString().slice(0, 10) : "—",
-            c.consentAt ? "yes" : "no",
           ])}
           empty={q ? "No contacts match that search." : "No contacts yet."}
         />

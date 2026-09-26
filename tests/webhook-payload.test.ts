@@ -25,7 +25,6 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
       {
         "email": "jane@example.com",
         "first_name": "Jane",
-        "marketing_consent": false,
         "source": "taboo-test",
         "submitted_at": "2026-06-03T10:30:00.000Z",
         "taboo_answers": "331215442443323",
@@ -48,7 +47,7 @@ describe("the GoHighLevel payload (SPEC §8.1)", () => {
         "taboo_sex_lowest_statement": "I'm fully comfortable expressing my sexual desires.",
         "taboo_sex_score": 10,
         "taboo_sex_start_here": "Write down the three words you most wish someone would use to describe you sexually. Example: Hot, luscious, creative. Don't edit. Notice what comes up for you when you read them over and decide on the first step you could take to embody the first word. Then take that step.",
-        "taboo_tags": "taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed",
+        "taboo_tags": "taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed, substack-subscriber, source-taboo-test",
         "taboo_terrain": "Sex",
         "taboo_terrain_line": "Your lowest score is in Sex. That's your most interesting terrain right now, and where a real shift is possible.",
         "taboo_test_version": "v1",

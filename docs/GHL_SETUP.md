@@ -72,7 +72,10 @@ table above.
 ## 4. Tags
 
 Try adding tags from `taboo_tags` directly — it arrives comma-separated, e.g.
-`taboo-test-completed, taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex`.
+`taboo-test-sex-low, taboo-test-death-high, taboo-test-cash-medium, taboo-test-terrain-sex, taboo-test-completed, substack-subscriber, source-taboo-test`.
+
+Two of those do work beyond labelling: `substack-subscriber` triggers the workflow in §6,
+and `taboo-test-completed` triggers the quarterly retake in §7.
 
 If GHL will not take dynamic tags, use **three If/Else blocks** on the `_level` fields
 (three branches each) plus one on `taboo_terrain`.
@@ -89,19 +92,87 @@ Structure (§8.4 of SPEC.md — all wording still to be written):
 - `{{taboo_terrain_line}}` — a complete sentence covering every tie case, so the template needs no logic
 - **START HERE** × 3: section name + `{{taboo_sex_start_here}}` / `{{taboo_death_start_here}}` / `{{taboo_cash_start_here}}`
 - A "See your full results" button linking to `{{taboo_result_url}}`
-- The EXPAND YOUR LIBERATION block with the Substack upgrade link (static, lives in GHL)
+- The EXPAND YOUR LIBERATION block with the Substack upgrade link (static, lives in GHL) — skipped for `substack-paid` contacts, see §8
 - A retake note, then the sign-off
 
 **Link `{{taboo_result_url}}` as-is.** It already carries
 `?utm_source=email&utm_medium=results`; rebuilding it in GHL breaks attribution.
 
-## 6. Optional: quarterly retake
+## 6. Workflow: "Substack subscriber – leave Tango nurture"
 
-A second workflow, **"Taboo Test – Quarterly retake"**: wait 90 days after the
-`taboo-test-completed` tag is added, then send the retake email with the test link. Skip
-it if you would rather send retakes from Substack.
+Every submission tags the contact `substack-subscriber`. Someone taking The Taboo Test
+came from the Substack list, so they are not a cold lead and should stop receiving the
+Taboo Tango nurture sequence.
 
-## 7. Before launch
+1. New workflow, **"Substack subscriber – leave Tango nurture"**.
+2. Trigger: **Contact Tag Added**, tag = `substack-subscriber`.
+3. Action: **Remove from Workflow** → the Taboo Tango nurture sequence. If that sequence
+   is a campaign rather than a workflow, use **Remove from Campaign**.
+4. Optional but worth it: also **Remove Tag** for whatever tag enrols people in that
+   sequence, so a later automation cannot put them back.
+
+**Order matters.** The results workflow (§2) adds the tags *and* sends the results email.
+If this workflow removes them from a sequence that is mid-send, GHL may still deliver a
+queued email — check the sequence has no message already scheduled for that contact.
+
+The monthly Substack import (§8) applies the same tag, so a subscriber who never takes the
+test leaves the nurture sequence too. Both paths agreeing is the point: `substack-subscriber`
+means "already on the list", whichever way we learned it.
+
+## 7. Workflow: "Taboo Test – Quarterly retake"
+
+1. New workflow, **"Taboo Test – Quarterly retake"**.
+2. Trigger: **Contact Tag Added**, tag = `taboo-test-completed`.
+3. Action: **Wait** 90 days.
+4. Action: **Send Email** — the retake email, with the test link back to the landing page.
+
+**Use the stored `taboo_*_score` fields as their "last time" scores.** The contact record
+still holds the scores from their most recent submission, so the retake email can say
+*"Last time: Sex 14/25, Death 21/25, Cash 9/25"* using `{{taboo_sex_score}}`,
+`{{taboo_death_score}}` and `{{taboo_cash_score}}` — no extra fields needed.
+
+Two things to get right:
+
+- **The custom fields are overwritten on every submission**, so by the time the *next*
+  retake email goes out these will hold the newer scores. That is what you want, but it
+  means the email must be read as "your last result", never "your first result".
+- **Someone who retakes resets the clock**, because `taboo-test-completed` is re-added.
+  Check the workflow is set to **re-enrol** contacts, or a second retake never fires.
+
+The app does not send this email and has no 90-day timer of its own. If you would rather
+send retakes from Substack, skip this workflow entirely — nothing in the app depends on it.
+
+## 8. Monthly: import the Substack CSV
+
+Keeps GoHighLevel's view of the list current, including who is paying.
+
+1. Export subscribers from Substack (Dashboard → Subscribers → Export).
+2. In GHL: **Contacts → Import**, matching on **email** so existing contacts update rather
+   than duplicate.
+3. Tag every imported row `substack-subscriber`.
+4. Tag paying subscribers `substack-paid`. If the export separates free and paid, import
+   them as two files with different tags; otherwise filter the CSV before importing.
+
+**Do not let the import clear tags.** GHL's import can be set to replace tags rather than
+add them — that would strip `taboo-test-*` tags from people who have taken the test.
+
+### The upgrade block is skipped for paying subscribers
+
+In the **"Taboo Test – Results"** workflow (§2), wrap the EXPAND YOUR LIBERATION block in
+an If/Else so paying subscribers are not asked to upgrade to something they already have:
+
+- **If** contact has tag `substack-paid` → send the results email **without** the upgrade
+  block.
+- **Else** → send it **with** the block.
+
+In GHL that is two Send Email actions on the two branches, using two copies of the
+template. The only difference between them is that block.
+
+**This depends on the import being current.** Someone who upgraded since the last import
+is still untagged and will be asked to upgrade again. Monthly is usually fine; run the
+import before a send if you have just announced a paid tier.
+
+## 9. Before launch
 
 - Take the test yourself on the live site and check the email end to end, **including on a
   phone**.

@@ -19,7 +19,7 @@ export async function resendWebhook(formData: FormData) {
   const attemptId = String(formData.get("attemptId") ?? "");
   const attempt = await prisma.attempt.findUnique({
     where: { id: attemptId },
-    include: { contact: { select: { id: true, email: true, firstName: true, attemptCount: true, tags: true, consentAt: true } } },
+    include: { contact: { select: { id: true, email: true, firstName: true, attemptCount: true, tags: true } } },
   });
   if (!attempt?.contact || attempt.status !== "submitted") return;
 
@@ -33,7 +33,6 @@ export async function resendWebhook(formData: FormData) {
       answers: attempt.answers,
       testVersion: attempt.testVersion,
       scored,
-      marketingConsent: !!attempt.contact.consentAt,
       submittedAt: attempt.submittedAt ?? new Date(),
       attemptNumber: attempt.attemptNumber ?? computeSubmission(null, scored).attemptNumber,
       tags: attempt.contact.tags,

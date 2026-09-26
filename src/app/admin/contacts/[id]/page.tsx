@@ -36,8 +36,7 @@ export default async function ContactPage({
       <div>
         <h1 className="font-display text-4xl text-red">{contact.email}</h1>
         <p className="mt-1 text-sm text-ink">
-          {contact.firstName} · {contact.attemptCount} attempt{contact.attemptCount === 1 ? "" : "s"} ·{" "}
-          {contact.consentAt ? "on the mailing list" : "not on the mailing list"}
+          {contact.firstName} · {contact.attemptCount} attempt{contact.attemptCount === 1 ? "" : "s"}
           {contact.isSeed && " · SEED (test data, never sent to GHL)"}
         </p>
       </div>

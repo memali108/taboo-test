@@ -60,7 +60,7 @@ async function submitSend(page: Page, email: string, firstName = FIRST_NAME) {
   await page.getByLabel("First name").fill(firstName);
   await page.getByLabel("Email").fill(email);
   await page.waitForTimeout(2100);
-  await page.getByRole("button", { name: /.+/ }).last().click();
+  await page.getByRole("button", { name: "Show my results" }).click();
   await page.waitForURL(RESULTS_URL);
 }
 
@@ -180,7 +180,7 @@ test("/send keeps what was typed when validation fails", async ({ page }) => {
   await page.getByLabel("First name").fill("Wilhelmina");
   await page.getByLabel("Email").fill("not-an-email");
   await page.waitForTimeout(2100);
-  await page.getByRole("button", { name: /.+/ }).last().click();
+  await page.getByRole("button", { name: "Show my results" }).click();
 
   // Still on /send, with an error and both fields intact.
   await expect(page).toHaveURL(/\/send$/);
@@ -194,7 +194,7 @@ test("the minimum-time guard rejects an instant submission", async ({ page }) =>
   await runAll(page, () => 2);
   await page.getByLabel("First name").fill(FIRST_NAME);
   await page.getByLabel("Email").fill(testEmail());
-  await page.getByRole("button", { name: /.+/ }).last().click(); // no wait
+  await page.getByRole("button", { name: "Show my results" }).click(); // no wait
   await expect(page.getByText(/take a moment/i).first()).toBeVisible();
   await expect(page).toHaveURL(/\/send$/);
 });
@@ -382,4 +382,21 @@ test.describe("admin", () => {
       await anon.dispose();
     });
   });
+});
+
+test("/send asks for a first name and email only", async ({ page }) => {
+  await begin(page);
+  await runAll(page, () => 3);
+  await expect(page).toHaveURL(/\/send$/);
+
+  await expect(page.getByText("Your results show up on the next screen. Your next step for each section goes to your inbox.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show my results" })).toBeVisible();
+  await expect(
+    page.getByText(/Submitting sends your next steps by email, and the test again next quarter\./),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /Privacy Policy/ })).toBeVisible();
+
+  // No mailing-list checkbox. REQUIRE_DATA_CONSENT is off, so no checkbox at all.
+  await expect(page.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(page.getByText(/mailing list/i)).toHaveCount(0);
 });

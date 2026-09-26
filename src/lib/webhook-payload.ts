@@ -28,7 +28,6 @@ export type PayloadInput = {
   answers: string;
   testVersion: string;
   scored: Scored;
-  marketingConsent: boolean;
   submittedAt: Date;
   attemptNumber: number;
   tags: string[];
@@ -42,7 +41,9 @@ export function buildPayload(i: PayloadInput): WebhookPayload {
     first_name: i.firstName,
     email: i.email,
     submitted_at: i.submittedAt.toISOString(),
-    marketing_consent: i.marketingConsent,
+    // No `marketing_consent`: the mailing-list box is gone. Takers are already Substack
+    // subscribers, and the results email plus the quarterly retake are the service they
+    // asked for by submitting. The `substack-subscriber` tag carries the list state now.
     source: "taboo-test",
     taboo_test_version: i.testVersion,
   };
@@ -92,7 +93,6 @@ export const PAYLOAD_FIELDS = Object.keys(
       },
       terrain: [],
     },
-    marketingConsent: false,
     submittedAt: new Date(0),
     attemptNumber: 1,
     tags: [],

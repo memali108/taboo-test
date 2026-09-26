@@ -173,11 +173,15 @@ export const SECTION_COPY = {
 
 export const SEND = {
   heading: "Where should I send your results?",
-  body: TBD("one-line body for the email step"),
-  button: TBD("button label for the email step"),
-  consentLabel: TBD("mailing-list checkbox label"),
-  finePrint: TBD("fine print under the email step button"),
-  /** Only rendered when REQUIRE_DATA_CONSENT is on. See SPEC §12. */
+  body: "Your results show up on the next screen. Your next step for each section goes to your inbox.",
+  button: "Show my results",
+  finePrint: "Submitting sends your next steps by email, and the test again next quarter. Every email has an unsubscribe link, and I don't sell or share your information.",
+  /**
+   * Only rendered when REQUIRE_DATA_CONSENT is on. See SPEC §12.
+   *
+   * There is no mailing-list checkbox: takers are already Substack subscribers, and the
+   * results email and quarterly retake are the service they asked for by submitting.
+   */
   dataConsentLabel: TBD("required data-processing consent line (SPEC §12)"),
 } as const;
 

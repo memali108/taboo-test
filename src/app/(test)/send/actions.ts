@@ -25,15 +25,12 @@ export type SendState = {
    * they get their results; making someone retype their email over a validation slip
    * loses them (taboo-quiz DECISIONS, "Email validation and form-state preservation").
    */
-  values?: { firstName: string; email: string; consent: boolean; dataConsent: boolean };
+  values?: { firstName: string; email: string; dataConsent: boolean };
 };
 
 const Schema = z.object({
   firstName: z.string().trim().min(1).max(80),
   email: z.string().trim().max(254),
-  // Optional: the results email is the service they asked for by submitting. This box is
-  // consent to the ongoing mailing list only, so its absence is not an error.
-  consent: z.string().optional(),
   // Only required when REQUIRE_DATA_CONSENT is on (SPEC §12).
   dataConsent: z.string().optional(),
   renderedAt: z.coerce.number(),
@@ -45,7 +42,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
   const values = {
     firstName: String(form.get("firstName") ?? ""),
     email: String(form.get("email") ?? ""),
-    consent: form.get("consent") === "on",
     dataConsent: form.get("dataConsent") === "on",
   };
   const fail = (error: string, field?: SendState["field"]): SendState => ({ error, field, values });
@@ -59,7 +55,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
   }
 
   const { firstName, renderedAt } = parsed.data;
-  const marketingConsent = parsed.data.consent === "on";
   const email = normalizeEmail(parsed.data.email);
   if (!isValidEmail(email)) return fail("Please check your email address.", "email");
 
@@ -107,9 +102,8 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
         attemptCount: plan.attemptNumber,
         lastSubmittedAt: now,
         tags: plan.tags,
-        // consentAt/consentSource mean MARKETING consent, and are set only when the
-        // optional box was ticked — never as a side effect of submitting.
-        ...(marketingConsent ? { consentAt: now, consentSource: "taboo-test" } : {}),
+        // consentAt/consentSource are legacy: there is no mailing-list box any more, so
+        // nothing writes them. Kept so any historical opt-in is not silently erased.
         // A contact created by a test run must never reach GoHighLevel either.
         isSeed,
       },
@@ -118,7 +112,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
         attemptCount: plan.attemptNumber,
         lastSubmittedAt: now,
         tags: plan.tags,
-        ...(marketingConsent ? { consentAt: now, consentSource: "taboo-test" } : {}),
       },
       select: { id: true },
     });
@@ -147,7 +140,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
         props: {
           attempt_number: plan.attemptNumber,
           is_retake: plan.isRetake,
-          marketing_consent: marketingConsent,
           ...Object.fromEntries(SECTIONS.map((s) => [`${s}_score`, scored.sections[s].total])),
         },
       },
@@ -168,7 +160,6 @@ export async function submitAction(_prev: SendState, form: FormData): Promise<Se
         answers: attempt.answers,
         testVersion: attempt.testVersion,
         scored,
-        marketingConsent,
         submittedAt: now,
         attemptNumber: plan.attemptNumber,
         tags: plan.tags,

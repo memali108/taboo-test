@@ -73,7 +73,7 @@ Next.js 16 (App Router) · TypeScript · Tailwind 4 · Prisma 6.x (pinned to 6, 
 ```
 /            Landing: title, intro, Start
 /test        15 statements, one per screen; a title card opens each section
-/send        First name + email (+ optional mailing-list box) → submit
+/send        First name + email → submit
 /r/[id]      Private results page (id = 24-char random, unguessable)
 /privacy     Privacy policy (see §12)
 /admin/*     Password-protected dashboard (see §11)
@@ -218,7 +218,9 @@ Wordmark → display headline → intro → "15 statements · about 3 minutes" �
 - A Back control sits top-left.
 
 ### 7.4 Email step `/send`
-Same form as Tango's `UnlockForm`, with the same safeguards and the same optional mailing-list checkbox semantics (result emails need no consent, the box is for the ongoing list). Copy from Appendix A. The button label comes from copy (not "Unlock").
+Same form as Tango's `UnlockForm`, with the same safeguards — honeypot, 2-second minimum time, rate limit, MX check, values echoed back on failure. Copy from Appendix A; the button label comes from copy (not "Unlock").
+
+**First name and email only. There is no mailing-list checkbox.** Takers are already Substack subscribers, and the results email plus the quarterly retake are the service they asked for by submitting — so there is no separate list to opt into. The only checkbox that can appear is the required data-processing one behind `REQUIRE_DATA_CONSENT` (§12), off by default.
 
 ### 7.5 Results `/r/[id]`
 
@@ -255,7 +257,6 @@ The prefix is `taboo_`, deliberately different from Tango's `tt_` so the GHL cus
 |---|---|---|
 | `first_name`, `email` | | normalized email |
 | `submitted_at` | ISO 8601 | |
-| `marketing_consent` | `false` | the optional box |
 | `source` | `"taboo-test"` | |
 | `taboo_test_version` | `"v1"` | |
 | `taboo_sex_score` / `taboo_death_score` / `taboo_cash_score` | `14` | 5–25 |
@@ -270,7 +271,9 @@ The prefix is `taboo_`, deliberately different from Tango's `tt_` so the GHL cus
 | `taboo_prev_sex_score` / `…death…` / `…cash…` | `12` or empty | |
 | `taboo_change_line` | text or empty | pre-written sentence, e.g. "Since your last test on June 3: Sex 12 → 17, Death 15 → 15, Cash 9 → 13." (wording `[COPY TBD]`). Empty on a first attempt, so the email shows nothing. |
 | `taboo_answers` | `"431254322153414"` | raw |
-| `taboo_tags` | comma-separated | `taboo-test-completed, taboo-test-sex-medium, taboo-test-death-high, taboo-test-cash-low, taboo-test-terrain-cash` (+ `taboo-test-retaken` on retakes) |
+| `taboo_tags` | comma-separated | `taboo-test-sex-medium, taboo-test-death-high, taboo-test-cash-low, taboo-test-terrain-cash, taboo-test-completed, substack-subscriber, source-taboo-test` (+ `taboo-test-retaken` on retakes) |
+
+`substack-subscriber` and `source-taboo-test` are applied to everyone who submits. `substack-subscriber` is load-bearing: a GoHighLevel workflow removes the contact from the Taboo Tango nurture sequence when it appears, so a subscriber is not courted as a new lead. The monthly Substack CSV import applies the same tag (§8.3).
 
 **Rule:** every copy field sent to GHL must be a **single paragraph of plain text** (no HTML, no line breaks), so it renders cleanly as a GHL merge field. The START HERE blocks already are.
 
@@ -289,8 +292,10 @@ Claude Code: generate this as `docs/GHL_SETUP.md` with the full field list.
 3. Action: Create/Update Contact (match by email), mapping all fields.
 4. Tags: try adding tags from `taboo_tags`. If GHL won't take dynamic tags, use three If/Else blocks on the `_level` fields (3 branches each) plus a terrain If/Else.
 5. Action: Send Email, using the "Taboo Test Results" template (§8.4).
-6. Optional **"Taboo Test – Quarterly retake"**: wait 90 days after the `taboo-test-completed` tag is added, then send the retake email with the test link. Skip this if you'll send retakes from Substack instead.
-7. **Before launch:** take the test yourself on the live site and check the email end to end, including on a phone.
+6. **"Substack subscriber – leave Tango nurture"**: trigger on the `substack-subscriber` tag being added, remove the contact from the Taboo Tango nurture sequence. Someone taking this test came from the Substack list and is not a cold lead.
+7. **"Taboo Test – Quarterly retake"**: wait 90 days after the `taboo-test-completed` tag is added, then send the retake email with the test link, using the stored `taboo_*_score` fields as their "last time" scores. Skip this if you'll send retakes from Substack instead.
+8. **Monthly Substack CSV import**, matching on email: tag `substack-subscriber`, and tag paying subscribers `substack-paid`. An If/Else on `substack-paid` in the results workflow skips the EXPAND YOUR LIBERATION upgrade block for people who already pay.
+9. **Before launch:** take the test yourself on the live site and check the email end to end, including on a phone.
 
 ### 8.4 Results email structure (all wording `[COPY TBD]`, refined with Marie-Elizabeth)
 Subject → greeting with `{{first_name}}` → one-line opener → three score lines (`Sex {{taboo_sex_score}}/25 · {{taboo_sex_level}}` …) → `{{taboo_change_line}}` → `{{taboo_terrain_line}}` → **START HERE** × 3 (section name + `{{…_start_here}}`) → "See your full results" button (`{{taboo_result_url}}`) → EXPAND YOUR LIBERATION block with the Substack upgrade link (static) → retake note ("I'll send you The Taboo Test again next quarter") → sign-off.
@@ -307,7 +312,7 @@ model Contact {
   id              String    @id @default(cuid())
   email           String    @unique
   firstName       String
-  consentAt       DateTime? // mailing-list opt-in only
+  consentAt       DateTime? // LEGACY — no mailing-list box exists; nothing writes these
   consentSource   String?
   attemptCount    Int       @default(0)
   lastSubmittedAt DateTime?
@@ -436,7 +441,10 @@ Verbatim from *Taboo_Test_Results.docx* unless marked `[COPY TBD]`. Each "(Where
 
 ### Email step (`/send`)
 - Heading: **Where should I send your results?**
-- `[COPY TBD]`: one-line body, button label, mailing-list checkbox label, fine print.
+- Body: "Your results show up on the next screen. Your next step for each section goes to your inbox."
+- Button: "Show my results"
+- Fine print: "Submitting sends your next steps by email, and the test again next quarter. Every email has an unsubscribe link, and I don't sell or share your information." followed by the Privacy Policy link.
+- *(No mailing-list checkbox. First name and email only — see §7.4.)*
 
 ### Results page: intro (Where: page)
 **HERE ARE YOUR TABOO TEST RESULTS**

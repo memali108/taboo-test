@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeSubmission, TAG_COMPLETED, TAG_RETAKEN, levelTag, terrainTag } from "@/lib/submit";
+import { computeSubmission, TAG_COMPLETED, TAG_RETAKEN, TAG_SUBSTACK, TAG_SOURCE, levelTag, terrainTag } from "@/lib/submit";
 import { score } from "@/lib/scoring";
 
 const mixed = score("331215442443323"); // Sex 10 low, Death 21 high, Cash 15 medium, terrain sex
@@ -52,6 +52,24 @@ describe("computeSubmission", () => {
     expect(p.tags.filter((t) => t.startsWith("taboo-test-sex-"))).toHaveLength(1);
     expect(p.tags.filter((t) => t === TAG_COMPLETED)).toHaveLength(1);
     expect(p.tags.filter((t) => t === TAG_RETAKEN)).toHaveLength(1);
+  });
+
+  it("always tags substack-subscriber and source-taboo-test, without duplicating them", () => {
+    const first = computeSubmission(null, mixed);
+    expect(first.tags).toContain(TAG_SUBSTACK);
+    expect(first.tags).toContain(TAG_SOURCE);
+
+    // A retake must not add them a second time.
+    const again = computeSubmission({ attemptCount: 1, tags: first.tags }, tie);
+    expect(again.tags.filter((t) => t === TAG_SUBSTACK)).toHaveLength(1);
+    expect(again.tags.filter((t) => t === TAG_SOURCE)).toHaveLength(1);
+  });
+
+  it("does not strip substack-subscriber when rebuilding level tags", () => {
+    // It is applied by the Substack CSV import too, and a GHL workflow keys off it —
+    // dropping it on a retake would re-enrol someone in the Tango nurture sequence.
+    const existing = { attemptCount: 2, tags: [TAG_SUBSTACK, levelTag("sex", "high")] };
+    expect(computeSubmission(existing, mixed).tags).toContain(TAG_SUBSTACK);
   });
 
   it("leaves tags this app does not manage alone", () => {

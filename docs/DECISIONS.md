@@ -61,6 +61,65 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## `/send` is first name and email only — 2026-09-26
+
+Final copy for the step, and the optional mailing-list checkbox is gone. Takers are
+already Substack subscribers; the results email and the quarterly retake are the service
+they asked for by submitting, so there was no second list to opt into. The fine print now
+says exactly that — *"sends your next steps by email, and the test again next quarter"* —
+which is a factual description of what submitting triggers, and needs revisiting if that
+stops being true.
+
+**`REQUIRE_DATA_CONSENT` is untouched.** That checkbox is a different thing: consent to
+*process* special-category data under the GDPR (SPEC §12), not consent to be marketed at.
+It stays built and off by default.
+
+**`Contact.consentAt` / `consentSource` are kept but no longer written.** Dropping columns
+is irreversible and they record a real thing that a few historical rows may hold; the
+schema now marks them LEGACY. What *did* change is the admin: the contacts list no longer
+has a "Mailing list" column and the contact page no longer says "not on the mailing list",
+because with nothing writing those fields, every row would read "no" and imply a list
+state to manage that does not exist. The seed stopped writing them too, so seeded data
+matches reality.
+
+**`marketing_consent` is out of the GoHighLevel payload.** There is no box, so sending
+`false` for everyone would be a field GHL could branch on that means nothing. List state
+is carried by the `substack-subscriber` tag instead.
+
+### Two tags that do work, not just label
+
+Every submission now also tags `substack-subscriber` and `source-taboo-test`.
+
+**`substack-subscriber` is load-bearing.** A GoHighLevel workflow removes the contact from
+the Taboo Tango nurture sequence when it appears, so someone who came from the Substack
+list is not courted as a new lead. The monthly Substack CSV import applies the same tag,
+which is the point: the tag means "already on the list", whichever way we learned it.
+
+That makes it dangerous to strip. `computeSubmission()` rebuilds level and terrain tags on
+every submission, and a test now pins that it does **not** remove `substack-subscriber`
+while doing so — dropping it on a retake would re-enrol someone in a sequence they had
+already left. Both new tags are also added idempotently, so a retake does not duplicate
+them.
+
+### GHL_SETUP.md gained three workflows
+
+Written up in the detail Marie-Elizabeth will need at the console, with the failure modes
+called out rather than left to be discovered:
+
+- **Leave Tango nurture** on `substack-subscriber`. Flagged: a sequence mid-send may still
+  deliver a queued email after the contact is removed.
+- **Quarterly retake**, 90 days after `taboo-test-completed`, using the stored
+  `taboo_*_score` fields as "last time" scores. Flagged twice: those fields are overwritten
+  by each submission, so the email must read as "your last result" rather than "your first";
+  and the workflow needs re-enrolment enabled or a second retake never fires.
+- **Monthly Substack CSV import** tagging `substack-subscriber` and `substack-paid`, with
+  an If/Else that skips the upgrade block for paying subscribers. Flagged: GHL's import can
+  be set to replace rather than add tags, which would strip `taboo-test-*` from everyone
+  who has taken the test; and anyone who upgraded since the last import is still untagged
+  and will be asked to upgrade again.
+
+SPEC §4, §7.4, §8.1, §8.3, §9 and Appendix A updated to match.
+
 ## Landing page copy is final — 2026-09-26
 
 Both `[COPY TBD]` slots on the landing page are filled, and the landing page no longer

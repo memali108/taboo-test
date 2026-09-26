@@ -9,6 +9,16 @@ import type { Level, Scored } from "./scoring";
 export const TAG_COMPLETED = "taboo-test-completed";
 export const TAG_RETAKEN = "taboo-test-retaken";
 
+/**
+ * Applied to everyone who submits, because taking the test means they came from the
+ * Substack list. `substack-subscriber` is load-bearing in GoHighLevel: a workflow removes
+ * the contact from the Taboo Tango nurture sequence when it appears, so a subscriber does
+ * not get courted as a new lead. The monthly Substack CSV import applies it too; both
+ * paths agreeing is the point. See docs/GHL_SETUP.md.
+ */
+export const TAG_SUBSTACK = "substack-subscriber";
+export const TAG_SOURCE = "source-taboo-test";
+
 export const levelTag = (s: Section, l: Level) => `taboo-test-${s}-${l}`;
 export const terrainTag = (s: Section) => `taboo-test-terrain-${s}`;
 
@@ -42,7 +52,9 @@ export function computeSubmission(existing: ContactSnapshot, scored: Scored): Su
   // yields none — matching `Attempt.terrain`, which is empty in that case (SPEC §6).
   for (const s of scored.terrain) tags.push(terrainTag(s));
 
-  if (!tags.includes(TAG_COMPLETED)) tags.push(TAG_COMPLETED);
+  for (const t of [TAG_COMPLETED, TAG_SUBSTACK, TAG_SOURCE]) {
+    if (!tags.includes(t)) tags.push(t);
+  }
   if (isRetake && !tags.includes(TAG_RETAKEN)) tags.push(TAG_RETAKEN);
 
   return { attemptNumber, isRetake, tags };

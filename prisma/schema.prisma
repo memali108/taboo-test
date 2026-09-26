@@ -23,7 +23,9 @@ model Contact {
   id              String    @id @default(cuid())
   email           String    @unique
   firstName       String
-  // Mailing-list opt-in only. The results email is the service asked for and needs no consent.
+  /// LEGACY. Recorded the optional mailing-list opt-in, which no longer exists — takers
+  /// are already Substack subscribers and nothing writes these. Kept rather than dropped
+  /// so any historical opt-in survives; the `substack-subscriber` tag carries list state.
   consentAt       DateTime?
   consentSource   String?
   attemptCount    Int       @default(0)

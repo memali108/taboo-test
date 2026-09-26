@@ -14,8 +14,9 @@ export function SendForm({ requireDataConsent }: { requireDataConsent: boolean }
    * A failed submission must not empty the form. React resets the form once the action
    * resolves, and resets each field to its *current* default — so echoing the submitted
    * values back from the action and feeding them in as defaults is what repopulates it.
-   * Controlled inputs do not work here: the reset unchecks the checkbox in the DOM and
-   * the `checked` prop does not re-assert. This also repopulates on the no-JS path.
+   * Controlled inputs do not work here: the reset unchecks the data-consent box in the
+   * DOM and the `checked` prop does not re-assert. This also repopulates on the no-JS
+   * path.
    */
   const v = state.values;
 
@@ -107,14 +108,6 @@ export function SendForm({ requireDataConsent }: { requireDataConsent: boolean }
           {err("dataConsent") && <p className="mt-1 text-sm text-bad">{err("dataConsent")}</p>}
         </div>
       )}
-
-      {/* Optional: the results need no separate consent. This is the mailing list. */}
-      <label className="flex min-h-11 cursor-pointer items-start gap-3 text-base text-ink-2">
-        <input type="checkbox" name="consent" defaultChecked={v?.consent ?? false} className="mt-1 size-5 shrink-0 accent-red" />
-        <span>
-          <Copy text={SEND.consentLabel} />
-        </span>
-      </label>
 
       {state.error && !state.field && (
         <p role="alert" className="rounded-md bg-bad-soft px-4 py-3 text-sm text-bad">
