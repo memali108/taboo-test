@@ -47,9 +47,7 @@ export const STATEMENT_TEXT_V1 = [
   "I have regrets about my sexual history.",
   "I'm fully comfortable expressing my sexual desires.",
   "I completely embrace how my body is changing with age.",
-  TBD(
-    'replacement for "I\'m able to freely live my life even with the awfulness of sexual assault culture all over the news."',
-  ),
+  "I make my own pleasure a priority, without a trace of guilt.",
   // DEATH
   "I could die today and feel complete.",
   "Knowing I will die one day inspires me to live full-out in each moment.",

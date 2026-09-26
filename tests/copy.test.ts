@@ -41,7 +41,14 @@ describe("statements are locked content", () => {
     expect(STATEMENTS[14].text).toBe("I feel guilty and unworthy when I indulge myself.");
   });
 
-  it("leaves Sex statement 5 as a placeholder for Marie-Elizabeth to replace (SPEC §14.1)", () => {
-    expect(STATEMENTS[4].text.startsWith("[COPY TBD")).toBe(true);
+  it("has the replacement Sex statement 5, scored normally (SPEC §14.1, resolved)", () => {
+    expect(STATEMENTS[4].text).toBe("I make my own pleasure a priority, without a trace of guilt.");
+    // Agreeing means more freedom, like the rest of the un-reversed statements, so a
+    // high rating must raise the Sex score rather than lower it.
+    expect(STATEMENTS[4].reversed).toBe(false);
+  });
+
+  it("has no placeholder left in any statement", () => {
+    for (const s of STATEMENTS) expect(s.text.startsWith("[COPY TBD"), s.text).toBe(false);
   });
 });

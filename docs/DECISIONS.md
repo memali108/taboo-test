@@ -61,6 +61,36 @@ anchor to an internal page skips client navigation. But the CSV is a download, a
 `next/link` would client-navigate to it instead of letting the browser save it. Disabled
 on that one line, with the reason.
 
+## Sex statement 5 is final, replaced in place while still `v1` — 2026-09-26
+
+*"I make my own pleasure a priority, without a trace of guilt."* Scored normally, not
+reversed: agreeing means more freedom, like every other un-reversed statement, so a 5
+raises the Sex score. Verified rather than assumed — rating it 1 gives Sex 13, rating it 5
+gives 17.
+
+It replaces the JotForm line SPEC §14.1 asked to be rid of, and it fixes what was wrong
+with that line: it asks about the relationship with desire rather than about the news, it
+asks one thing, and it does not route a survivor to Low copy about "shame and silence".
+Still exactly one statement, because the 5–25 level ranges assume five per section.
+
+**Editing locked content in place is normally forbidden**, and this is a deliberate,
+authorised exception rather than a loosening of the rule. Marie-Elizabeth's call: no real
+respondent has taken the test, and the database is wiped before launch (SPEC §15.5).
+
+Worth being precise about what the risk actually was, because the rule's usual
+justification does not apply here. `Attempt.answers` is positional, and what changed was
+**only the wording** — not the order, not the section, not the reversal flag. So no stored
+score is altered by this edit; every existing row still scores exactly as it did. What
+changes is what position 5 *means*, which makes the attempts already in the database
+semantically stale rather than numerically wrong. They are test and seed rows, and the
+launch wipe removes them.
+
+**The exception closes the moment a real respondent exists.** SPEC §5.2 and CLAUDE.md both
+say so at the point where someone would be tempted to repeat it.
+
+With this, **no statement carries a placeholder any more** — a test now asserts that
+across all fifteen, so the `[COPY TBD]` check cannot quietly regress on a future edit.
+
 ## `/send` is first name and email only — 2026-09-26
 
 Final copy for the step, and the optional mailing-list checkbox is gone. Takers are

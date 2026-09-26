@@ -62,8 +62,13 @@ statements 2, 9, 12, 13 and 15.
 or changing a reversal flag silently re-scores every historical row. If the test genuinely
 changes, **bump `TEST_VERSION`** rather than editing in place.
 
-Sex statement 5 is still `[COPY TBD]` pending SPEC §14.1. It must stay exactly one
-statement — the 5–25 level ranges assume five per section.
+Every statement now has final copy. Sex statement 5 was replaced **in place, still `v1`**,
+on 2026-09-26 — the one authorised exception, taken when no real respondent existed and
+the database was due to be wiped before launch (SPEC §5.2, §15.5). Position, order and
+reversal flags were untouched, so no stored score changed; only what position 5 *means*
+did. **Once a real respondent exists, that exception is closed: bump `TEST_VERSION`.**
+
+Any section must stay at exactly five statements — the 5–25 level ranges assume it.
 
 ## Sea Glass contrast rules (measured)
 

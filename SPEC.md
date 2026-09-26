@@ -110,12 +110,14 @@ Render as five full-width answer cards, stacked, using Tango's `QuestionCard` st
 
 `R` = reversed (scored as `6 − rating`). Order, wording and reversal flags are locked per `TEST_VERSION`. Changing any of them means bumping the version, never editing in place (same rule as Tango's `QUIZ_VERSION`).
 
+*Sex statement 5 was replaced in place on 2026-09-26 while still `v1`, by Marie-Elizabeth's decision: no real respondent has taken the test, and the database is wiped before launch (§15.5). Position, order and reversal flags did not change, so no stored score is altered — only what position 5 means. This is the one authorised exception; once a real respondent exists, bump the version.*
+
 **SEX**
 1. I feel sexy AF.
 2. I have regrets about my sexual history. **R**
 3. I'm fully comfortable expressing my sexual desires.
 4. I completely embrace how my body is changing with age.
-5. `[COPY TBD: replacement for "I'm able to freely live my life even with the awfulness of sexual assault culture all over the news."]` (see §14)
+5. I make my own pleasure a priority, without a trace of guilt.
 
 **DEATH**
 6. I could die today and feel complete.
@@ -394,7 +396,7 @@ The flag is set once at creation and read from the stored row thereafter, so it 
 ---
 
 ## 14. Open items (Marie-Elizabeth to decide in the copy session)
-1. **Sex statement 5.** Replace it. As written, it measures reactions to the news rather than the relationship with desire, asks two things at once, and a survivor who rates it low lands on Low copy about "shame and silence." Needs a new statement you write. Because the level ranges assume 5 statements, it must stay one statement.
+1. ~~**Sex statement 5.** Replace it. As written, it measures reactions to the news rather than the relationship with desire, asks two things at once, and a survivor who rates it low lands on Low copy about "shame and silence." Needs a new statement you write. Because the level ranges assume 5 statements, it must stay one statement.~~ **Resolved 2026-09-26:** replaced with "I make my own pleasure a priority, without a trace of guilt." — one statement, scored normally (not reversed), asking about the relationship with desire rather than about the news.
 2. ~~**"Nobody sees this but you"** (JotForm intro) isn't true once answers are stored and sent to GHL. It needs new wording.~~ **Resolved 2026-09-26:** removed entirely rather than reworded. The intro now ends at "Be honest."
 3. **Unverified claims.** Keep, source, or soften each.
    - ~~"Most people score lower than they expect in at least one section"~~ **Resolved 2026-09-26:** softened on the landing page to "You may score lower than you expect in at least one section", which claims nothing about other people.
