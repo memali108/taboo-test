@@ -240,51 +240,80 @@ test("a retake with the same email gets its own results page", async ({ page }) 
 /**
  * Admin smoke test. Gated on ADMIN_PASSWORD so a normal run skips it; supply the value
  * the deployment uses to exercise the dashboard against real data.
+ *
+ * **Logs in exactly once per run**, then reuses the cookie. `/admin/login` is rate
+ * limited to 8 attempts per 15 minutes per IP — correct for production, and enough to
+ * make a suite that logs in per test fail on its second run of the afternoon. Only the
+ * deliberate wrong-password test spends another attempt.
  */
+const ADMIN_STATE = "test-results/.admin-auth.json";
+
 test.describe("admin", () => {
   test.skip(!process.env.ADMIN_PASSWORD, "ADMIN_PASSWORD not set");
 
-  /** Log in and WAIT for the redirect — navigating away first races the cookie. */
-  async function loginAdmin(page: Page) {
-    await page.goto("/admin/login");
-    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
-    await page.getByRole("button", { name: /Log in/ }).click();
-    await page.waitForURL(/\/admin$/);
-  }
-
-  test("is password protected and the dashboard renders", async ({ page }) => {
-    await page.goto("/admin");
-    await expect(page).toHaveURL(/\/admin\/login/);
-
-    await loginAdmin(page);
-    await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
-
-    for (const [path, heading] of [
-      ["/admin/levels", "Levels"],
-      ["/admin/statements", "Statements"],
-      ["/admin/contacts", "Contacts"],
-      ["/admin/retakes", "Retakes"],
-      ["/admin/settings", "Settings"],
-      ["/admin/health", "Health"],
-    ] as const) {
-      await page.goto(path);
-      await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
-    }
+  test.beforeAll(async ({ browser, baseURL }) => {
+    // `storageState: undefined` explicitly: browser.newContext() inherits context
+    // options from `use`, so without this the hook that CREATES the auth file tries to
+    // read it first.
+    const ctx = await browser.newContext({ baseURL, storageState: undefined });
+    const p = await ctx.newPage();
+    await p.goto("/admin/login");
+    await p.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
+    await p.getByRole("button", { name: /Log in/ }).click();
+    await p.waitForURL(/\/admin$/);
+    await ctx.storageState({ path: ADMIN_STATE });
+    await ctx.close();
   });
 
-  test("Health warns that no webhook is configured", async ({ page }) => {
-    await loginAdmin(page);
-    await page.goto("/admin/health");
-    // GoHighLevel is not set up yet, so this alert is the expected state for now.
-    await expect(page.getByText(/No GoHighLevel webhook is configured/i)).toBeVisible();
+  test("/admin redirects to the login page when signed out", async ({ page }) => {
+    await page.goto("/admin");
+    await expect(page).toHaveURL(/\/admin\/login/);
   });
 
   test("a wrong password does not get in", async ({ page }) => {
     await page.goto("/admin/login");
     await page.getByLabel("Password").fill("definitely-not-the-password");
     await page.getByRole("button", { name: /Log in/ }).click();
-    await expect(page.getByText(/Wrong password/i)).toBeVisible();
+    await expect(page.getByText(/Wrong password|Too many attempts/i)).toBeVisible();
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/admin\/login/);
+  });
+
+  test.describe("signed in", () => {
+    test.use({ storageState: ADMIN_STATE });
+
+    test("every dashboard page renders", async ({ page }) => {
+      await page.goto("/admin");
+      await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
+
+      for (const [path, heading] of [
+        ["/admin/levels", "Levels"],
+        ["/admin/statements", "Statements"],
+        ["/admin/contacts", "Contacts"],
+        ["/admin/retakes", "Retakes"],
+        ["/admin/settings", "Settings"],
+        ["/admin/health", "Health"],
+      ] as const) {
+        await page.goto(path);
+        await expect(page.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+      }
+    });
+
+    test("Health warns that no webhook is configured", async ({ page }) => {
+      await page.goto("/admin/health");
+      // GoHighLevel is not set up yet, so this alert is the expected state for now.
+      await expect(page.getByText(/No GoHighLevel webhook is configured/i)).toBeVisible();
+    });
+
+    test("the CSV export is served to an admin and hidden from everyone else", async ({ page, request }) => {
+      const ok = await page.request.get("/admin/contacts/export");
+      expect(ok.status()).toBe(200);
+      expect(ok.headers()["content-type"]).toContain("text/csv");
+      expect(await ok.text()).toContain("email,first_name");
+
+      // `request` is a fresh context with no admin cookie.
+      const denied = await request.get("/admin/contacts/export", { maxRedirects: 0 });
+      expect(denied.status()).not.toBe(200);
+    });
   });
 });
