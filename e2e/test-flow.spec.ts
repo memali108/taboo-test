@@ -244,13 +244,19 @@ test("a retake with the same email gets its own results page", async ({ page }) 
 test.describe("admin", () => {
   test.skip(!process.env.ADMIN_PASSWORD, "ADMIN_PASSWORD not set");
 
+  /** Log in and WAIT for the redirect — navigating away first races the cookie. */
+  async function loginAdmin(page: Page) {
+    await page.goto("/admin/login");
+    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
+    await page.getByRole("button", { name: /Log in/ }).click();
+    await page.waitForURL(/\/admin$/);
+  }
+
   test("is password protected and the dashboard renders", async ({ page }) => {
     await page.goto("/admin");
     await expect(page).toHaveURL(/\/admin\/login/);
 
-    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
-    await page.getByRole("button", { name: /Log in/ }).click();
-    await expect(page).toHaveURL(/\/admin$/);
+    await loginAdmin(page);
     await expect(page.getByRole("heading", { name: "Overview" })).toBeVisible();
 
     for (const [path, heading] of [
@@ -267,9 +273,7 @@ test.describe("admin", () => {
   });
 
   test("Health warns that no webhook is configured", async ({ page }) => {
-    await page.goto("/admin/login");
-    await page.getByLabel("Password").fill(process.env.ADMIN_PASSWORD!);
-    await page.getByRole("button", { name: /Log in/ }).click();
+    await loginAdmin(page);
     await page.goto("/admin/health");
     // GoHighLevel is not set up yet, so this alert is the expected state for now.
     await expect(page.getByText(/No GoHighLevel webhook is configured/i)).toBeVisible();
